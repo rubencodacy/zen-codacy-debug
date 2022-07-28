@@ -138,6 +138,7 @@ testScripts=(
   'fundaddresses.py'
   'p2p_ignore_spent_tx.py'
   'sc_getscgenesisinfo.py'
+  'sc_getcertmaturityinfo.py'
 );
 testScriptsExt=(
   'getblocktemplate_longpoll.py'
