@@ -115,11 +115,11 @@ bool CSidechain::CheckQuality(const CScCertificate& cert) const
     // Quality disabled in non-ceasing SC, hence always return true if quality is 0
     if (isNonCeasing())
     {
-        if (cert.quality != 0) {
-            LogPrint("cert", "%s.%s():%d - NOK, cert %s for non-ceasing sidechain, but quality is non zero (q=%d).\n",
-                __FILE__, __func__, __LINE__, cert.GetHash().ToString(), cert.quality);
-            return false;
-        }
+//        if (cert.quality != 0) {
+//            LogPrint("cert", "%s.%s():%d - NOK, cert %s for non-ceasing sidechain, but quality is non zero (q=%d).\n",
+//                __FILE__, __func__, __LINE__, cert.GetHash().ToString(), cert.quality);
+//            return false;
+//        }
         return true;
     }
 
