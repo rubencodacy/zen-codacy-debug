@@ -145,6 +145,13 @@ if [ "x${1:-}" = 'x--use-clang' ]; then
     shift
 fi
 
+# If --enable-sonar-cloud is true, the Sonar Cloud analysis is performed:
+SONAR_CLOUD_ARG=''
+if [ "x${1:-}" = 'x--enable-sonar-cloud' ]; then
+    SONAR_CLOUD_ARG='build-wrapper-linux-x86-64 --out-dir bw-output'
+    shift
+fi
+
 eval "$MAKE" --version
 as --version
 ld -v
@@ -152,4 +159,8 @@ ld -v
 HOST="$HOST" BUILD="$BUILD" NO_PROTON="$PROTON_ARG" LIBZENDOO_LEGACY_CPU="$LIBZENDOO_LEGACY_CPU" CLANG_ARG="$CLANG_ARG" "$MAKE" "$@" -C ./depends/ V=1
 ./autogen.sh
 CONFIG_SITE="$PWD/depends/$HOST/share/config.site" ./configure "$HARDENING_ARG" "$LCOV_ARG" "$TEST_ARG" "$MINING_ARG" "$PROTON_ARG" "$ADDRESSINDEXING_ARG" $CONFIGURE_FLAGS CXXFLAGS='-g'
-"$MAKE" "$@" V=1
+"$SONAR_CLOUD_ARG" "$MAKE" "$@" V=1
+
+if [ -n "$SONAR_CLOUD_ARG" ]; then
+    sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output
+fi
