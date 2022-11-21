@@ -2,6 +2,12 @@ language: shell
 
 os: linux
 
+addons:
+  sonarcloud:
+    organization: "horizen"
+    token:
+      secure: "eZuyUG7JBcgsym7ScIZXz0guGxyBYg5oWCihYdwj0+WEFGt0zyfQYH0fuQAdrdZ6hap1rv6jReIY9IjEC5m0eavN7zIL0tHlzzJUiRPSdCw9hgEGgwkHG8ionhwecVar2cvS3xjrOqerNB+hdruQ3k3r6LrhC/wOb9wXICg2L03Ml2KkkaB4Y7l/bb+PX1j90vJp289c35h0e4mZv2G3nqDuGywoJu/AbxvqgYrDQabcoVYmaK//kddrYYeBUhzuwAHNH2huyacWQz1SYj6VrUBGXFKdFQGfRY9g/nBc6GJM8nT1xrhB6jOr9Rc5SoYUeJ1Sc29S+Hcwm8xvup8VjE780UDi24ZgFETNITEG/hqnqZanVAu2zQYpSlOhf5OL9Z1WAGb0Do8Q6wSg5sVLQuvmNT4Ls6d27+AxUy+gtWIEEFtMdoMdo5zlDZ/XoR2vcqbQyRMWmNccS08VB1DeY84+pq0ZYpX9x2k0uUaiguEPpoOHoJc63lMGcalon/Eg/kQXfzY23SqZU+8Xpeh4aprwUscZcS83RM581WCesNNPt8IYnB/nEY1uNe7P8WDZ2g9UMAGJl16hKOPMl88qeuPMlxEq85XoED+/TECs8Ij6vnnT9I1jEC4nmSL1Bc9clEKrDTbOqSOTGivH9zMYJuNms8zLNnU677OVa/Ny9UU="
+
 .com.github.horizenofficial.zen.env-definitions:
   - &docker_amd64_linux_ubuntu_bionic
     env:
