@@ -29,6 +29,7 @@ addons:
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - SONAR_CLOUD_FLAG="--enable-sonar-cloud"
   - &docker_amd64_linux_ubuntu_jammy_legacy_cpu
     env:
       - DOCKER_ARCH=amd64
