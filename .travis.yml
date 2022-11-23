@@ -487,4 +487,3 @@ jobs:
     - stage: Finalize_coverage
     <<: *finalize_docker_amd64_x-large
     <<: *docker_amd64_linux_ubuntu_jammy
-
