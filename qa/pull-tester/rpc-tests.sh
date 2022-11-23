@@ -24,6 +24,10 @@ for i in "$@"; do
       SPLIT="${i#*=}"
       shift
       ;;
+    -coverage)
+      COVERAGE="true"
+      shift
+      ;;
     *)
       # unknown option/passOn
       passOn+="${i} "
@@ -250,11 +254,16 @@ function runTestScript
     failures[${#failures[@]}]="$testName"
     echo "!!! FAIL: ${testName} !!!"
   fi
-
-  echo
 }
 
 if [ "x${ENABLE_BITCOIND}${ENABLE_UTILS}${ENABLE_WALLET}" = "x111" ]; then
+  # Create baseline coverage data
+  if [ ! -z "$COVERAGE" ] && [ "${COVERAGE}" = "true" ];
+  then
+    lcov --directory "${BUILDDIR}"/src --zerocounters
+    lcov -c -i -d "${BUILDDIR}/src" -o py_test_coverage_base.info -rc lcov_branch_coverage=1
+  fi
+
   for (( i = 0; i < ${#testScripts[@]}; i++ )); do
     checkFileExists "${testScripts[$i]}"
 
@@ -265,6 +274,19 @@ if [ "x${ENABLE_BITCOIND}${ENABLE_UTILS}${ENABLE_WALLET}" = "x111" ]; then
         --srcdir "${BUILDDIR}/src" ${passOn}
     fi
   done
+
+  # Evaluate and aggregate the coverage reports and send everything to Codacy
+  if [ ! -z "$COVERAGE" ] && [ "${COVERAGE}" = "true" ];
+  then
+    lcov -c -d "${BUILDDIR}/src" -o py_test_coverage_after.info -rc lcov_branch_coverage=1
+    lcov -a py_test_coverage_base.info -a py_test_coverage_after.info -o py_test_coverage.info
+    export CODACY_API_TOKEN="${CODACY_API_TOKEN_COVERAGE}"
+    export CODACY_ORGANIZATION_PROVIDER="gh"
+    export CODACY_USERNAME="HorizenOfficial"
+    export CODACY_PROJECT_NAME="zen"
+    COMMIT=`git log -1 --format="%H"`
+    bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP --commit-uuid "${COMMIT}" -r py_test_coverage.info
+  fi
 
   total=$(($successCount + ${#failures[@]}))
   echo -e "\n\nTests completed: $total"

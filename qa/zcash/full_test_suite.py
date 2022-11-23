@@ -194,6 +194,8 @@ def main():
                         action='store', help='comma separated string of rpc tests to exclude, see qa/rpc-tests/README.md for more')
     parser.add_argument('--rpc-split', dest='split',
                         action='store', help='string in format m:n, see qa/rpc-tests/README.md for more')
+    parser.add_argument('--coverage', dest='enable_cov',
+                        action='store_true', help='Enables code coverage data collection')
     args = parser.parse_args()
 
     # Check for list
@@ -220,6 +222,8 @@ def main():
                 options.append('-exclude=' + args.exclude)
             if args.split:
                 options.append('-split=' + args.split)
+            if args.enable_cov:
+                options.append('-coverage')
             passed &= run_stage(s, options)
         else:
             passed &= run_stage(s)
