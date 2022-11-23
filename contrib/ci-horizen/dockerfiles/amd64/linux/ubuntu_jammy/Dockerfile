@@ -19,9 +19,13 @@ RUN set -euxo pipefail \
     && pip3 install pycryptodome b2sdk==1.14.1 b2==3.2.1 pyblake2 websocket-client pyzmq \
     && curl --silent https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip --output build-wrapper-linux-x86.zip \
     && unzip build-wrapper-linux-x86.zip \
+    && ls -larth \
+    && ls build-wrapper-linux-x86 \
     && mv build-wrapper-linux-x86/* /usr/local/bin/ \
     && chmod +x /usr/local/bin/build-wrapper-linux-x86-64 \
     && rm -rf build-wrapper-linux-x86 \
+    && ls -larth /usr/local/bin/ \
+    && ls /usr/local/bin/build-wrapper-linux-x86-64 \
     && BASEURL="https://github.com/tianon/gosu/releases/download/" \
     && GOSU_VERSION="1.13" \
     && DPKG_ARCH="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \

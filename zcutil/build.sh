@@ -77,7 +77,7 @@ set -x
 # If --enable-sonar-cloud is set as first argument, the Sonar Cloud analysis is performed:
 SONAR_CLOUD_ARG=''
 if [ "x${1:-}" = 'x--enable-sonar-cloud' ]; then
-    SONAR_CLOUD_ARG='build-wrapper-linux-x86-64 --out-dir bw-output'
+    SONAR_CLOUD_ARG='/usr/local/bin/build-wrapper-linux-x86-64 --out-dir bw-output'
     shift
 fi
 
