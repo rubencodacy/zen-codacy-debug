@@ -17,6 +17,11 @@ RUN set -euxo pipefail \
        cmake curl dirmngr fakeroot git g++-multilib gnupg2 help2man libc6-dev libgomp1 libtool lintian m4 ncurses-dev \
        pigz pkg-config pv python3-dev python3-pip python3-setuptools python3-wheel time unzip wget zlib1g-dev \
     && pip3 install pycryptodome b2sdk==1.14.1 b2==3.2.1 pyblake2 websocket-client pyzmq \
+    && curl --silent https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip --output build-wrapper-linux-x86.zip \
+    && unzip build-wrapper-linux-x86.zip \
+    && mv build-wrapper-linux-x86/* /usr/local/bin/ \
+    && chmod +x /usr/local/bin/build-wrapper-linux-x86-64 \
+    && rm -rf build-wrapper-linux-x86 \
     && BASEURL="https://github.com/tianon/gosu/releases/download/" \
     && GOSU_VERSION="1.13" \
     && DPKG_ARCH="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
