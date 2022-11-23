@@ -74,7 +74,14 @@ fi
 
 set -x
 
-# If --enable-lcov is the first argument, enable lcov coverage support:
+# If --enable-sonar-cloud is set as first argument, the Sonar Cloud analysis is performed:
+SONAR_CLOUD_ARG=''
+if [ "x${1:-}" = 'x--enable-sonar-cloud' ]; then
+    SONAR_CLOUD_ARG='build-wrapper-linux-x86-64 --out-dir bw-output'
+    shift
+fi
+
+# If --enable-lcov is the next argument, enable lcov coverage support:
 LCOV_ARG=''
 HARDENING_ARG='--enable-hardening'
 TEST_ARG=''
@@ -145,13 +152,6 @@ if [ "x${1:-}" = 'x--use-clang' ]; then
     shift
 fi
 
-# If --enable-sonar-cloud is true, the Sonar Cloud analysis is performed:
-SONAR_CLOUD_ARG=''
-if [ "x${1:-}" = 'x--enable-sonar-cloud' ]; then
-    SONAR_CLOUD_ARG='build-wrapper-linux-x86-64 --out-dir bw-output'
-    shift
-fi
-
 eval "$MAKE" --version
 as --version
 ld -v
@@ -159,8 +159,10 @@ ld -v
 HOST="$HOST" BUILD="$BUILD" NO_PROTON="$PROTON_ARG" LIBZENDOO_LEGACY_CPU="$LIBZENDOO_LEGACY_CPU" CLANG_ARG="$CLANG_ARG" "$MAKE" "$@" -C ./depends/ V=1
 ./autogen.sh
 CONFIG_SITE="$PWD/depends/$HOST/share/config.site" ./configure "$HARDENING_ARG" "$LCOV_ARG" "$TEST_ARG" "$MINING_ARG" "$PROTON_ARG" "$ADDRESSINDEXING_ARG" $CONFIGURE_FLAGS CXXFLAGS='-g'
-"$SONAR_CLOUD_ARG" "$MAKE" "$@" V=1
 
-if [ -n "$SONAR_CLOUD_ARG" ]; then
+if [ -z "$SONAR_CLOUD_ARG" ]; then
+    "$MAKE" "$@" V=1
+else
+    "$SONAR_CLOUD_ARG" "$MAKE" "$@" V=1
     sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output
 fi
