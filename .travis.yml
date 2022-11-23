@@ -483,7 +483,6 @@ jobs:
       if: env(SKIP_OSX) != true
       <<: *test_osx_xcode9_4
       <<: *amd64_osx_xcode9_4_rpc-tests_10
-
     - stage: Finalize_coverage
-    <<: *finalize_docker_amd64_x-large
-    <<: *docker_amd64_linux_ubuntu_jammy
+      <<: *finalize_docker_amd64_x-large
+      <<: *docker_amd64_linux_ubuntu_jammy
