@@ -23,6 +23,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
   - &docker_amd64_linux_ubuntu_jammy_legacy_cpu
     env:
       - DOCKER_ARCH=amd64
@@ -106,6 +107,14 @@ os: linux
       - DOCKER_IS_DEB=true
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="btest gtest sec-hard no-dot-so util-test secp256k1 libsnark univalue"
+  - &docker_amd64_linux_ubuntu_jammy_unit-tests_with_coverage
+    env:
+      - DOCKER_ARCH=amd64
+      - DOCKER_TARGET_OS=linux
+      - DOCKER_FROM=ubuntu_jammy
+      - DOCKER_IS_DEB=true
+      - TEST_CMD="./qa/zcash/full_test_suite.py"
+      - TEST_ARGS="b-gtest_with_coverage"
   - &docker_amd64_linux_ubuntu_jammy_rpc-tests_1
     env:
       - DOCKER_ARCH=amd64
@@ -262,16 +271,6 @@ os: linux
     script:
       - bash -c "${TRAVIS_BUILD_DIR}/contrib/ci-horizen/scripts/build/build_${TRAVIS_CPU_ARCH}_${DOCKER_TARGET_OS}_${DOCKER_FROM}.sh"
       - bash -c "${TRAVIS_BUILD_DIR}/contrib/ci-horizen/scripts/common/push_archive.sh ${B2_UL_COMPRESS_FOLDER} ${B2_UL_FILENAME}"
-  - &build_docker_amd64_x-large_with_sa
-    os: linux
-    dist: focal
-    vm:
-      size: x-large
-    cache:
-      directories:
-        - "$HOME/.ccache"
-    script:
-      - bash -c "${TRAVIS_BUILD_DIR}/contrib/ci-horizen/scripts/build/build_${TRAVIS_CPU_ARCH}_${DOCKER_TARGET_OS}_${DOCKER_FROM}_with_sa.sh"
   - &test_docker_amd64
     if: env(SKIP_TESTS) != true
     os: linux
@@ -351,9 +350,6 @@ jobs:
       <<: *build_docker_amd64_x-large
       <<: *docker_amd64_linux_ubuntu_jammy
     - stage: Build
-      <<: *build_docker_amd64_x-large_with_sa
-      <<: *docker_amd64_linux_ubuntu_jammy
-    - stage: Build
       <<: *build_docker_amd64_x-large
       <<: *docker_amd64_linux_ubuntu_jammy_legacy_cpu
     - stage: Build
@@ -402,6 +398,9 @@ jobs:
     - stage: Test
       <<: *test_docker_amd64_x-large
       <<: *docker_amd64_linux_ubuntu_jammy_unit-tests
+    - stage: Test
+      <<: *test_docker_amd64_x-large
+      <<: *docker_amd64_linux_ubuntu_jammy_unit-tests_with_coverage
     - stage: Test
       <<: *test_docker_amd64_x-large
       <<: *docker_amd64_linux_ubuntu_jammy_rpc-tests_1

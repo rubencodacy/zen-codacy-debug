@@ -228,7 +228,7 @@ zen-gtest_coverage.info: baseline_filtered_combined.info zen-gtest_filtered.info
 	$(LCOV) -a baseline_filtered.info -a leveldb_baseline_filtered.info -a zen-gtest_filtered.info -o $@
 
 total_coverage.info:  baseline_filtered_combined.info test_bitcoin_filtered.info zen-gtest_filtered.info
-	$(LCOV) -a baseline_filtered.info -a leveldb_baseline_filtered.info -a test_bitcoin_filtered.info -a zen-gtest_filtered.info -a block_test_filtered.info -o $@ | $(GREP) "\%" | $(AWK) '{ print substr($$3,2,50) "/" $$5 }' > coverage_percent.txt
+	$(LCOV) -a baseline_filtered.info -a leveldb_baseline_filtered.info -a test_bitcoin_filtered.info -a zen-gtest_filtered.info -o $@ | $(GREP) "\%" | $(AWK) '{ print substr($$3,2,50) "/" $$5 }' > coverage_percent.txt
 
 test_bitcoin.coverage/.dirstamp:  test_bitcoin_coverage.info
 	$(GENHTML) -s $< -o $(@D)
@@ -246,6 +246,15 @@ total.coverage/.dirstamp: total_coverage.info
 
 cov: test_bitcoin.coverage/.dirstamp cov-zen total.coverage/.dirstamp
 
+cov_ci: test_bitcoin.coverage/.dirstamp cov-zen total.coverage/.dirstamp
+  export CODACY_API_TOKEN=$(CODACY_API_TOKEN_COVERAGE)
+  export CODACY_ORGANIZATION_PROVIDER="gh"
+  export CODACY_USERNAME="HorizenOfficial"
+  export CODACY_PROJECT_NAME="zen"
+  export COMMIT=`git log -1 --format="%H"`
+  bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP --commit-uuid $(COMMIT) -r total_coverage.info
+
+
 endif
 
 dist_bin_SCRIPTS = zcutil/fetch-params.sh
@@ -258,7 +267,7 @@ install-exec-hook:
 
 CLEANFILES = $(OSX_DMG) $(BITCOIN_WIN_INSTALLER)
 
-.INTERMEDIATE: $(COVERAGE_INFO)
+#.INTERMEDIATE: $(COVERAGE_INFO)
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-man
 
