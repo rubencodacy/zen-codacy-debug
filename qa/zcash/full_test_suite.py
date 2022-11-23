@@ -134,7 +134,7 @@ def util_test():
 STAGES = [
     'btest',
     'gtest',
-    'b-gtest_with_coverage'
+    'b-gtest_with_coverage',
     'sec-hard',
     'no-dot-so',
     'util-test',
