@@ -246,13 +246,12 @@ total.coverage/.dirstamp: total_coverage.info
 
 cov: test_bitcoin.coverage/.dirstamp cov-zen total.coverage/.dirstamp
 
+COMMIT = `git log -1 --format="%H"`
+
 cov_ci: test_bitcoin.coverage/.dirstamp cov-zen total.coverage/.dirstamp
-  export CODACY_API_TOKEN=$(CODACY_API_TOKEN_COVERAGE)
-  export CODACY_ORGANIZATION_PROVIDER="gh"
-  export CODACY_USERNAME="HorizenOfficial"
-  export CODACY_PROJECT_NAME="zen"
-  export COMMIT=`git log -1 --format="%H"`
-  bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP --commit-uuid $(COMMIT) -r total_coverage.info
+	bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP --commit-uuid ${COMMIT} \
+    --api-token ${CODACY_API_TOKEN_COVERAGE} --organization-provider "gh" \
+    --username "HorizenOfficial" --project-name "zen" -r total_coverage.info 
 
 
 endif

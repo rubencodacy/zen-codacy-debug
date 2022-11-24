@@ -205,10 +205,13 @@ if [ ! -z "$EXCLUDE" ]; then
   done
 fi
 
+currentChunk="0"
+
 # split array into m parts and only run tests of part n where SPLIT=m:n
 if [ ! -z "$SPLIT" ]; then
   chunks="${SPLIT%*:*}"
   chunk="${SPLIT#*:}"
+  currentChunk="${chunk}"
   chunkSize="$((${#testScripts[@]}/${chunks}))"
   start=0
   for (( i = 1; i <= $chunks; i++ )); do
@@ -279,13 +282,14 @@ if [ "x${ENABLE_BITCOIND}${ENABLE_UTILS}${ENABLE_WALLET}" = "x111" ]; then
   if [ ! -z "$COVERAGE" ] && [ "${COVERAGE}" = "true" ];
   then
     lcov -c -d "${BUILDDIR}/src" -o py_test_coverage_after.info -rc lcov_branch_coverage=1
-    lcov -a py_test_coverage_base.info -a py_test_coverage_after.info -o py_test_coverage.info
+    lcov -a py_test_coverage_base.info -a py_test_coverage_after.info -o py_test_coverage_"${currentChunk}".info
     export CODACY_API_TOKEN="${CODACY_API_TOKEN_COVERAGE}"
     export CODACY_ORGANIZATION_PROVIDER="gh"
     export CODACY_USERNAME="HorizenOfficial"
     export CODACY_PROJECT_NAME="zen"
     COMMIT=`git log -1 --format="%H"`
-    bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP --commit-uuid "${COMMIT}" -r py_test_coverage.info
+    bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP \
+        --commit-uuid "${COMMIT}" -r py_test_coverage_"${currentChunk}".info
   fi
 
   total=$(($successCount + ${#failures[@]}))
