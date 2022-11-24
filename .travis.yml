@@ -105,6 +105,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="btest gtest sec-hard no-dot-so util-test secp256k1 libsnark univalue"
   - &docker_amd64_linux_ubuntu_jammy_unit-tests_with_coverage
@@ -113,6 +114,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="b-gtest_with_coverage"
   - &docker_amd64_linux_ubuntu_jammy_rpc-tests_1
@@ -121,6 +123,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="rpc --rpc-extended --rpc-split=4:1 --coverage"
   - &docker_amd64_linux_ubuntu_jammy_rpc-tests_2
@@ -129,6 +132,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="rpc --rpc-extended --rpc-split=4:2 --coverage"
   - &docker_amd64_linux_ubuntu_jammy_rpc-tests_3
@@ -137,6 +141,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="rpc --rpc-extended --rpc-split=4:3 --coverage"
   - &docker_amd64_linux_ubuntu_jammy_rpc-tests_4
@@ -145,6 +150,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zcash/full_test_suite.py"
       - TEST_ARGS="rpc --rpc-extended --rpc-split=4:4 --coverage"
   - &docker_amd64_linux_ubuntu_jammy_test-fetch-params
@@ -153,6 +159,7 @@ os: linux
       - DOCKER_TARGET_OS=linux
       - DOCKER_FROM=ubuntu_jammy
       - DOCKER_IS_DEB=true
+      - MAKEFLAGS="--enable-lcov"
       - TEST_CMD="./qa/zen/test-fetch-params.sh"
 
   - &docker_amd64_linux_ubuntu_focal_unit-tests
