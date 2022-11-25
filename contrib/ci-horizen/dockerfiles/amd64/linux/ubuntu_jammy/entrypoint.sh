@@ -42,4 +42,7 @@ done
 # Fix ownership recursively
 chown -RH zenbuilder:zenbuilder /home/zenbuilder
 
+echo "Debug point 6"
+ls -lha /usr/local/bin/
+
 exec /usr/local/bin/gosu zenbuilder "$@"

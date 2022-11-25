@@ -17,6 +17,9 @@ function gprefix() {
 gprefix READLINK readlink
 cd "$(dirname "$("$READLINK" -f "$0")")/.."
 
+echo "Debug point 1"
+ls -lha /usr/local/bin/
+
 # Allow user overrides to $MAKE. Typical usage for users who need it:
 #   MAKE=gmake ./zcutil/build.sh -j$(nproc)
 if [[ -z "${MAKE-}" ]]; then
@@ -81,6 +84,9 @@ if [ "x${1:-}" = 'x--enable-sonar-cloud' ]; then
     shift
 fi
 
+echo "Debug point 2"
+ls -lha /usr/local/bin/
+
 # If --enable-lcov is the next argument, enable lcov coverage support:
 LCOV_ARG=''
 HARDENING_ARG='--enable-hardening'
@@ -137,6 +143,9 @@ if [ "$LIBZENDOO_LEGACY_CPU" = "false" ]; then
 fi
 set -x
 
+echo "Debug point 3"
+ls -lha /usr/local/bin/
+
 # If --enable-address-indexing is the next argument, enable building AddressIndexing code:
 ADDRESSINDEXING_ARG=''
 if [ "x${1:-}" = 'x--enable-address-indexing' ]
@@ -160,9 +169,15 @@ HOST="$HOST" BUILD="$BUILD" NO_PROTON="$PROTON_ARG" LIBZENDOO_LEGACY_CPU="$LIBZE
 ./autogen.sh
 CONFIG_SITE="$PWD/depends/$HOST/share/config.site" ./configure "$HARDENING_ARG" "$LCOV_ARG" "$TEST_ARG" "$MINING_ARG" "$PROTON_ARG" "$ADDRESSINDEXING_ARG" $CONFIGURE_FLAGS CXXFLAGS='-g'
 
+echo "Debug point 4"
+ls -lha /usr/local/bin/
+
 if [ -z "$SONAR_CLOUD_ARG" ]; then
     "$MAKE" "$@" V=1
 else
+    echo "Debug point 5"
+    ls -lha /usr/local/bin/
+    env
     "$SONAR_CLOUD_ARG" "$MAKE" "$@" V=1
     sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output
 fi
