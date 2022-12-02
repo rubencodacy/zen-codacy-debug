@@ -136,6 +136,7 @@ testScripts=(
   'sc_rpc_cmds_json_output.py'
   'sc_getscgenesisinfo.py'
   'fundaddresses.py'
+  'oversized_tx.py'
 );
 testScriptsExt=(
   'getblocktemplate_longpoll.py'

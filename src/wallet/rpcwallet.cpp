@@ -674,7 +674,7 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
 
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
-    CAmount nFeeRequired;
+    CAmount nFeeRequired = 0;
     std::string strError;
     vector<CRecipient> vecSend;
     vector<CRecipientScCreation> vecScSend;
@@ -717,7 +717,7 @@ UniValue sendtoaddress(const UniValue& params, bool fHelp)
             "                             this is not part of the transaction, just kept in your wallet\n"
             "4. \"comment-to\"         (string, optional) a comment to store the name of the person or organization\n"
             "                             to which you're sending the transaction\n"
-            "                             this is not part of thetransaction, just kept in your wallet\n"
+            "                             this is not part of the transaction, just kept in your wallet\n"
             "5. subtractfeefromamount  (boolean, optional, default=false) the fee will be deducted from the amount being sent\n"
             "                             the recipient will receive less Horizen than you enter in the amount field\n"
             
