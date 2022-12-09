@@ -606,6 +606,9 @@ void CSidechain::DumpScFees() const
                   << "/" << std::setw(2) << entry.mbtrTxScFee << "]";
     }
     std::cout << std::endl;
+
+    float valore2 = 32.0f;
+    int valore1 = 1;
 }
 
 CAmount CSidechain::GetMinFtScFee() const
