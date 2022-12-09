@@ -252,7 +252,9 @@ cov_ci: test_bitcoin.coverage/.dirstamp cov-zen total.coverage/.dirstamp
 	bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l CPP --commit-uuid ${COMMIT} \
     --api-token ${CODACY_API_TOKEN_COVERAGE} --organization-provider "gh" \
     --username "HorizenOfficial" --project-name "zen" -r total_coverage.info 
-
+	bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial -l C   --commit-uuid ${COMMIT} \
+    --api-token ${CODACY_API_TOKEN_COVERAGE} --organization-provider "gh" \
+    --username "HorizenOfficial" --project-name "zen" -r total_coverage.info
 
 endif
 
