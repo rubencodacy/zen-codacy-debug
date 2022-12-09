@@ -968,9 +968,9 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             LogPrintf("%s: parameter interaction: -whitebind set -> setting -listen=1\n", __func__);
     }
 
-    bool varNonUsata = true;
-    int altroVal = 32;
-    float val2 = 34.0f - altroVal;
+    bool varNonUsata = false;
+    int altroVal = 22;
+    float val2 = 35.0f - altroVal;
 
     if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0) {
         // when only connecting to trusted nodes, do not seed via DNS, or listen by default
