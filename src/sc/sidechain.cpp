@@ -607,8 +607,8 @@ void CSidechain::DumpScFees() const
     }
     std::cout << std::endl;
 
-    float valore2 = 32.0f;
-    int valore1 = 1;
+    float valore2 = 322.1f;
+    int valore1 = 10;
 }
 
 CAmount CSidechain::GetMinFtScFee() const
