@@ -894,8 +894,8 @@ size_t ScRpcCmd::addInputs(size_t availableBytes)
     CAmount targetAmount = _totalOutputAmount + _fee;
     CAmount nValueRet = 0;
     size_t baseInputsSize = 0;
-    std::set<std::pair<const CWalletTransactionBase*,unsigned int>> setCoinsRet;
-    std::pair<const CWalletTransactionBase*,unsigned int> smallestCoin;
+    std::vector<COutput> vCoinsRet;
+    COutput smallestCoin(NULL, 0, 0, false);
     CAmount smallestValue = std::numeric_limits<CAmount>::max();
     CAmount totalValue = 0;
 
@@ -930,7 +930,7 @@ size_t ScRpcCmd::addInputs(size_t availableBytes)
             CAmount value = out.tx->getTxBase()->GetVout()[out.pos].nValue;
             if (value < smallestValue && value >= _dustThreshold)
             {
-                smallestCoin = std::make_pair(out.tx, out.pos);
+                smallestCoin = out;
                 smallestValue = value;
             }
         }
@@ -941,7 +941,7 @@ size_t ScRpcCmd::addInputs(size_t availableBytes)
         for (int loop = 0; loop < MAX_LOOP; ++loop) // loop provided for handling possible dust threshold
         {
             int conf = 0; // already filtered above
-            bool res = pwalletMain->SelectCoinsMinConf(targetAmount, conf, conf, vAvailableCoinsFiltered, setCoinsRet, nValueRet, baseInputsSize,
+            bool res = pwalletMain->SelectCoinsMinConf(targetAmount, conf, conf, vAvailableCoinsFiltered, vCoinsRet, nValueRet, baseInputsSize,
                                                        availableBytes, _automaticFee); // auto fee -> use input net values, manual fee -> fee already explicitly included in target amount
 
             if (!res)
@@ -990,7 +990,7 @@ size_t ScRpcCmd::addInputs(size_t availableBytes)
     {
         // this case allows to handle situation where no coins would be selected
         // at least one input must be included (resulting in full change output) to avoid tx/cert rejection
-        setCoinsRet.insert(smallestCoin);
+        vCoinsRet.push_back(smallestCoin);
         _totalInputAmount = smallestValue;
     }
 
@@ -998,26 +998,32 @@ size_t ScRpcCmd::addInputs(size_t availableBytes)
     size_t limit = (size_t)GetArg("-mempooltxinputlimit", 0);
     if (limit > 0)
     {
-        size_t n = setCoinsRet.size();
+        size_t n = vCoinsRet.size();
         if (n > limit) {
             throw JSONRPCError(RPC_WALLET_ERROR, strprintf("Too many transparent inputs %zu > limit %zu", n, limit));
         }
     }
 
     // update the transaction with these inputs
-    for (const auto& coin : setCoinsRet)
+    for (const auto& coin : vCoinsRet)
     {
-        CTxIn in(coin.first->getTxBase()->GetHash(),coin.second);
+        CTxIn in(coin.tx->getTxBase()->GetHash(),coin.pos);
         addInput(in);
     }
 
     return baseInputsSize;
 }
 
-void ScRpcCmd::addChange()
+size_t ScRpcCmd::addChange(bool onlyComputeDummyChangeSize)
 {
+    size_t baseOutputChangeOnlySize = 0;
+
     // fee must start from 0 when automatically calculated, and then its updated. It might also be set explicitly to 0
     CAmount change = _totalInputAmount - ( _totalOutputAmount + _fee);
+    if (onlyComputeDummyChangeSize)
+    {
+        change = std::numeric_limits<CAmount>::max(); //in this way the change output size is voluntarily slightly overestimated
+    }
 
     if (change > 0)
     {
@@ -1050,6 +1056,7 @@ void ScRpcCmd::addChange()
 
         // Never create dust outputs; if we would, just add the dust to the fee.
         CTxOut newTxOut(change, scriptPubKey);
+        baseOutputChangeOnlySize = newTxOut.GetSerializeSize(SER_NETWORK, PROTOCOL_VERSION);
         if (newTxOut.IsDust(::minRelayTxFee))
         {
             LogPrint("sc", "%s():%d - adding dust change=%lld to fee\n", __func__, __LINE__, change);
@@ -1057,9 +1064,14 @@ void ScRpcCmd::addChange()
         }
         else
         {
-            addOutput(CTxOut(change, scriptPubKey));
+            if (!onlyComputeDummyChangeSize)
+            {
+                addOutput(newTxOut);
+            }
         }
     }
+
+    return baseOutputChangeOnlySize;
 }
 
 ScRpcCmdCert::ScRpcCmdCert(
@@ -1083,27 +1095,7 @@ void ScRpcCmdCert::_execute()
     certificateSize.overheadSize = _cert.GetSerializeSize(SER_NETWORK, PROTOCOL_VERSION);
 
     // compute size of dummy change output (when estimating certificate size, change output is always included)
-    CScript dummyScriptChange;
-    if (_hasChangeAddress)
-    {
-        dummyScriptChange = GetScriptForDestination(_changeMcAddress.Get());
-    }
-    else if (_hasFromAddress)
-    {
-        dummyScriptChange = GetScriptForDestination(_fromMcAddress.Get());
-    }
-    else
-    {
-        CReserveKey keyChange(pwalletMain);
-        CPubKey vchPubKey;
-        // bitcoin code has also KeepKey() in the CommitTransaction() for preventing the key reuse,
-        // but zcash does not do that.
-        if (!keyChange.GetReservedKey(vchPubKey))
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Could not generate a taddr to use as a change address"); // should never fail, as we just unlocked
-        dummyScriptChange = GetScriptForDestination(vchPubKey.GetID());
-    }
-    CTxOut dummyChangeTxOut(0, dummyScriptChange);
-    certificateSize.baseOutputChangeOnlySize = dummyChangeTxOut.GetSerializeSize(SER_NETWORK, PROTOCOL_VERSION);
+    certificateSize.baseOutputChangeOnlySize = addChange(true);
 
     // add crosschain outputs and store their sizes
     certificateSize.baseOutputsNoChangeSize += addBackwardTransfers();
@@ -1119,7 +1111,7 @@ void ScRpcCmdCert::_execute()
     certificateSize.baseInputsSize = addInputs(MAX_CERT_SIZE - (certificateSize.overheadSize + certificateSize.baseOutputChangeOnlySize + certificateSize.baseOutputsNoChangeSize + certificateSize.certificateVariableFieldsSize));
 
     // add actual change base output
-    addChange();
+    certificateSize.baseOutputChangeOnlySize = addChange();
 
     sign();
 }
@@ -1378,27 +1370,7 @@ void ScRpcCmdTx::_execute()
     transactionSize.overheadSize = _tx.GetSerializeSize(SER_NETWORK, PROTOCOL_VERSION);
 
     // compute size of dummy change output (when estimating transaction size, change output is always included)
-    CScript dummyScriptChange;
-    if (_hasChangeAddress)
-    {
-        dummyScriptChange = GetScriptForDestination(_changeMcAddress.Get());
-    }
-    else if (_hasFromAddress)
-    {
-        dummyScriptChange = GetScriptForDestination(_fromMcAddress.Get());
-    }
-    else
-    {
-        CReserveKey keyChange(pwalletMain);
-        CPubKey vchPubKey;
-        // bitcoin code has also KeepKey() in the CommitTransaction() for preventing the key reuse,
-        // but zcash does not do that.
-        if (!keyChange.GetReservedKey(vchPubKey))
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Could not generate a taddr to use as a change address"); // should never fail, as we just unlocked
-        dummyScriptChange = GetScriptForDestination(vchPubKey.GetID());
-    }
-    CTxOut dummyChangeTxOut(0, dummyScriptChange);
-    transactionSize.baseOutputChangeOnlySize = dummyChangeTxOut.GetSerializeSize(SER_NETWORK, PROTOCOL_VERSION);
+    transactionSize.baseOutputChangeOnlySize = addChange(true);
 
     // add crosschain outputs and store their sizes
     transactionSize.sidechainOutputsSize = addCcOutputs();
@@ -1407,7 +1379,7 @@ void ScRpcCmdTx::_execute()
     transactionSize.baseInputsSize = addInputs(MAX_TX_SIZE - (transactionSize.overheadSize + transactionSize.baseOutputChangeOnlySize + transactionSize.sidechainOutputsSize));
 
     // add actual change base output
-    addChange();
+    transactionSize.baseOutputChangeOnlySize = addChange();
 
     sign();
 }
