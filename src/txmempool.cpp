@@ -1982,7 +1982,6 @@ bool CCoinsViewMemPool::GetSidechain(const uint256& scId, CSidechain& info) cons
             }
 
             info.lastTopQualityCertReferencedEpoch = certTopQual.epochNumber;
-            info.lastInclusionHeight += 1; // assume this certificate would be included in the next block
         }
     }
 
