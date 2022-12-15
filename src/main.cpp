@@ -979,11 +979,11 @@ std::map<uint256, uint256> HighQualityCertData(const CBlock& blockToConnect, con
     std::map<uint256, uint256> res;
     for(auto itCert = blockToConnect.vcert.rbegin(); itCert != blockToConnect.vcert.rend(); ++itCert)
     {
-        CSidechain sidechain;
-        if (!view.GetSidechain(itCert->GetScId(), sidechain))
+        if (visitedScIds.count(itCert->GetScId()) != 0)
             continue;
 
-        if (visitedScIds.count(itCert->GetScId()) != 0 && !sidechain.isNonCeasing())
+        CSidechain sidechain;
+        if(!view.GetSidechain(itCert->GetScId(), sidechain))
             continue;
 
         if (itCert->epochNumber == sidechain.lastTopQualityCertReferencedEpoch)
@@ -1000,7 +1000,7 @@ std::map<uint256, uint256> HighQualityCertData(const CBlock& blockToConnect, con
     return res;
 }
 
-std::map<uint256, uint256> HighQualityCertData(const CBlock& blockToDisconnect, const CBlockUndo& blockUndo, const CCoinsViewCache& view, std::map<uint256, uint256>& lowEpoch)
+std::map<uint256, uint256> HighQualityCertData(const CBlock& blockToDisconnect, const CBlockUndo& blockUndo)
 {
     // The function assumes that certs of given scId are ordered by increasing quality and
     // reference all the same epoch as CheckBlock() guarantees.
@@ -1012,23 +1012,18 @@ std::map<uint256, uint256> HighQualityCertData(const CBlock& blockToDisconnect, 
     for (int certPos = blockToDisconnect.vcert.size() - 1; certPos >= 0; certPos--)
     {
         const CScCertificate& cert = blockToDisconnect.vcert.at(certPos);
-        CSidechain sidechain;
-        if (!view.GetSidechain(cert.GetScId(), sidechain))
-            continue;
 
-        if (visitedScIds.count(cert.GetScId()) != 0 && !sidechain.isNonCeasing())
+        if (visitedScIds.count(cert.GetScId()) != 0)
             continue;
 
         if (cert.epochNumber == blockUndo.scUndoDatabyScId.at(cert.GetScId()).prevTopCommittedCertReferencedEpoch)
         {
-            assert(!sidechain.isNonCeasing());
             res[cert.GetHash()] = blockUndo.scUndoDatabyScId.at(cert.GetScId()).prevTopCommittedCertHash;
         }
         else
             res[cert.GetHash()] = uint256();
 
         visitedScIds.insert(cert.GetScId());
-        lowEpoch[cert.GetScId()] = cert.GetHash();
     }
 
     return res;
@@ -1192,7 +1187,7 @@ void RejectMemoryPoolTxBase(const CValidationState& state, const CTransactionBas
 }
 
 MempoolReturnValue AcceptCertificateToMemoryPool(CTxMemPool& pool, CValidationState &state, const CScCertificate &cert,
-    LimitFreeFlag fLimitFree, RejectAbsurdFeeFlag fRejectAbsurdFee, MempoolProofVerificationFlag fProofVerification, SkipTimingCheckFlag fSkipTimingCheck, CNode* pfrom)
+    LimitFreeFlag fLimitFree, RejectAbsurdFeeFlag fRejectAbsurdFee, MempoolProofVerificationFlag fProofVerification, CNode* pfrom)
 {
     AssertLockHeld(cs_main);
 
@@ -1229,12 +1224,6 @@ MempoolReturnValue AcceptCertificateToMemoryPool(CTxMemPool& pool, CValidationSt
         return MempoolReturnValue::INVALID;
     }
 
-    if (!pool.checkReferencedHeight(cert))
-    {
-        LogPrintf("%s(): wrong sequence of certificates in mempool\n", __func__);
-        return MempoolReturnValue::INVALID;
-    }
-
     if (!pool.checkIncomingCertConflicts(cert))
     {
         LogPrintf("%s(): certificate has conflicts in mempool\n", __func__);
@@ -1242,7 +1231,7 @@ MempoolReturnValue AcceptCertificateToMemoryPool(CTxMemPool& pool, CValidationSt
     }
 
     // Check if cert is already in mempool or if there are conflicts with in-memory certs
-    std::pair<uint256, CAmount> conflictingCertData = pool.FindCertWithQualityInEpoch(cert.GetScId(), cert.quality, cert.epochNumber);
+    std::pair<uint256, CAmount> conflictingCertData = pool.FindCertWithQuality(cert.GetScId(), cert.quality);
 
     {
         uint256 certHash = cert.GetHash();
@@ -1265,7 +1254,7 @@ MempoolReturnValue AcceptCertificateToMemoryPool(CTxMemPool& pool, CValidationSt
 
             int nDoS = 0;
 
-            CValidationState::Code ret_code = view.IsCertApplicableToState(cert, fSkipTimingCheck == SkipTimingCheckFlag::ON);
+            CValidationState::Code ret_code = view.IsCertApplicableToState(cert);
             if (ret_code != CValidationState::Code::OK)
             {
                 if (ret_code == CValidationState::Code::INVALID_AND_BAN)
@@ -1301,17 +1290,24 @@ MempoolReturnValue AcceptCertificateToMemoryPool(CTxMemPool& pool, CValidationSt
 
             nFees = cert.GetFeeAmount(view.GetValueIn(cert));
 
-            if (!conflictingCertData.first.IsNull())
+            CSidechain sc;
+            if (!view.GetSidechain(cert.GetScId(), sc))
             {
-                CSidechain sc;
-                if (view.GetSidechain(cert.GetScId(), sc) && sc.isNonCeasing())
-                {
-                    state.Invalid(
-                        error("%s():%d - Dropping cert %s : conflicting with another cert in mempool for non ceasing SC\n",
-                            __func__, __LINE__, certHash.ToString()),
-                        CValidationState::Code::INVALID, "bad-sc-cert-quality");
-                    return MempoolReturnValue::INVALID;
-                } else if (conflictingCertData.second >= nFees)
+                LogPrint("mempool", "%s():%d - ERROR: cert[%s] refers to a non existing sidechain[%s]\n", __func__, __LINE__, certHash.ToString(), cert.GetScId().ToString());
+                return MempoolReturnValue::INVALID;
+            }
+
+            if (sc.isNonCeasing() && pool.certificateExists(cert.GetScId()))
+            {
+                state.Invalid(
+                    error("%s():%d - Dropping cert %s : conflicting with another cert in mempool for non ceasing SC\n",
+                        __func__, __LINE__, certHash.ToString()),
+                    CValidationState::Code::INVALID, "bad-sc-cert-conflict");
+                return MempoolReturnValue::INVALID;
+            }
+            else if (!sc.isNonCeasing())
+            {
+                if (!conflictingCertData.first.IsNull() && conflictingCertData.second >= nFees)
                 {
                     state.Invalid(
                         error("%s():%d - Dropping cert %s : low fee and same quality as other cert in mempool\n",
@@ -1797,7 +1793,7 @@ MempoolReturnValue AcceptTxBaseToMemoryPool(CTxMemPool& pool, CValidationState &
         if (txBase.IsCertificate())
         {
             return AcceptCertificateToMemoryPool(pool, state, dynamic_cast<const CScCertificate&>(txBase), fLimitFree,
-                                                 fRejectAbsurdFee, fProofVerification, SkipTimingCheckFlag::OFF, pfrom);
+                                                 fRejectAbsurdFee, fProofVerification, pfrom);
         }
         else
         {
@@ -2798,8 +2794,7 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
 
     // not including coinbase
     const int certOffset = block.vtx.size() - 1;
-    std::map<uint256, uint256> lowEpochCertData;
-    std::map<uint256, uint256> highQualityCertData = HighQualityCertData(block, blockUndo, view, lowEpochCertData);
+    std::map<uint256, uint256> highQualityCertData = HighQualityCertData(block, blockUndo);
     // key: current block top quality cert for given sc --> value: prev block superseeded cert hash (possibly null)
 
     // undo certificates in reverse order
@@ -2941,7 +2936,7 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
                                            CScCertificateStatusUpdateInfo::BwtState::BWT_ON));
             }
 
-            if (lowEpochCertData.at(cert.GetScId()) == cert.GetHash() && !view.RestoreSidechain(cert, blockUndo.scUndoDatabyScId.at(cert.GetScId())))
+            if (!view.RestoreSidechain(cert, blockUndo.scUndoDatabyScId.at(cert.GetScId())))
             {
                 LogPrint("sc", "%s():%d - ERROR undoing certificate\n", __func__, __LINE__);
                 return error("DisconnectBlock(): certificate can not be reverted: data inconsistent");
@@ -3634,7 +3629,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
         control.Add(vChecks);
 
-        CValidationState::Code ret_code = view.IsCertApplicableToState(cert, false); // false means do not skip timing checks
+        CValidationState::Code ret_code = view.IsCertApplicableToState(cert);
         if (ret_code != CValidationState::Code::OK)
         {
             return state.DoS(100, error("%s():%d: invalid sc certificate [%s], ret_code[0x%x]",
@@ -4160,17 +4155,25 @@ bool static DisconnectTip(CValidationState &state) {
             return error("DisconnectTip(): DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
         assert(view.Flush());
     }
-    size_t erased = mapCumtreeHeight.erase(pindexDelete->scCumTreeHash.GetLegacyHash());
-    LogPrint("sc", "- Removed %lu entries from mapCumtreeHeight\n", erased);
     LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * 0.001);
+
+    std::list<CTransaction> dummyTxs;
+    std::list<CScCertificate> dummyCerts;
+
+    size_t erased = mapCumtreeHeight.erase(pindexDelete->scCumTreeHash.GetLegacyHash());
+    if (erased) {
+        LogPrint("sc", "- Removed %zu entries from mapCumtreeHeight\n", erased);
+        mempool.removeCertificatesWithoutRef(pcoinsTip, dummyCerts);
+    }
+    dummyTxs.clear();
+    dummyCerts.clear();
+
     uint256 anchorAfterDisconnect = pcoinsTip->GetBestAnchor();
     // Write the chain state to disk, if necessary.
     if (!FlushStateToDisk(state, FLUSH_STATE_IF_NEEDED))
         return false;
 
     // Resurrect mempool transactions and certificates from the disconnected block.
-    std::list<CTransaction> dummyTxs;
-    std::list<CScCertificate> dummyCerts;
     for(const CTransaction &tx: block.vtx) {
         // ignore validation errors in resurrected transactions
         CValidationState stateDummy;
@@ -4195,7 +4198,7 @@ bool static DisconnectTip(CValidationState &state) {
         LogPrint("sc", "%s():%d - resurrecting certificate [%s] to mempool\n", __func__, __LINE__, cert.GetHash().ToString());
         CValidationState stateDummy;
         if (MempoolReturnValue::VALID != AcceptCertificateToMemoryPool(mempool, stateDummy, cert,
-                LimitFreeFlag::OFF, RejectAbsurdFeeFlag::OFF, MempoolProofVerificationFlag::DISABLED, SkipTimingCheckFlag::ON, nullptr))
+                LimitFreeFlag::OFF, RejectAbsurdFeeFlag::OFF, MempoolProofVerificationFlag::DISABLED, nullptr))
         {
             LogPrint("sc", "%s():%d - removing certificate [%s] from mempool\n[%s]\n",
                 __func__, __LINE__, cert.GetHash().ToString(), cert.ToString());

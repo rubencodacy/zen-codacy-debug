@@ -165,8 +165,6 @@ struct CSidechainUndoData
 
     // NONCEASING_CERT_DATA
     int prevInclusionHeight;
-    int prevReferencedHeight;
-    CAmount deltaBalance;
 
     CSidechainUndoData(): sidechainUndoDataVersion(0), contentBitMask(AvailableSections::UNDEFINED),
         appliedMaturedAmount(0), pastEpochTopQualityCertView(), scFees(),
@@ -207,8 +205,6 @@ struct CSidechainUndoData
         if (contentBitMask & AvailableSections::NONCEASING_CERT_DATA)
         {
             totalSize += ::GetSerializeSize(prevInclusionHeight,  nType, nVersion);
-            totalSize += ::GetSerializeSize(prevReferencedHeight, nType, nVersion);
-            totalSize += ::GetSerializeSize(deltaBalance,         nType, nVersion);
         }
         return totalSize;
     }
@@ -251,8 +247,6 @@ struct CSidechainUndoData
         if (contentBitMask & AvailableSections::NONCEASING_CERT_DATA)
         {
             ::Serialize(s, prevInclusionHeight,  nType, nVersion);
-            ::Serialize(s, prevReferencedHeight, nType, nVersion);
-            ::Serialize(s, deltaBalance,         nType, nVersion);
         }
         return;
     }
@@ -296,8 +290,6 @@ struct CSidechainUndoData
         if (contentBitMask & AvailableSections::NONCEASING_CERT_DATA)
         {
             ::Unserialize(s, prevInclusionHeight, nType, nVersion);
-            ::Unserialize(s, prevReferencedHeight, nType, nVersion);
-            ::Unserialize(s, deltaBalance, nType, nVersion);
         }
         return;
     }
@@ -331,7 +323,6 @@ struct CSidechainUndoData
             res += strprintf("prevTopCommittedCertQuality=%d\n", prevTopCommittedCertQuality);
             res += strprintf("prevTopCommittedCertBwtAmount=%d.%08d\n", prevTopCommittedCertBwtAmount / COIN, prevTopCommittedCertBwtAmount % COIN);
             res += strprintf("lastTopQualityCertView=%s\n", lastTopQualityCertView.ToString());
-            res += strprintf("prevReferencedHeight=%d\n", prevReferencedHeight);
             res += strprintf("prevInclusionHeight=%d\n", prevInclusionHeight);
         }
 

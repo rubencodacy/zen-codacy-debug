@@ -98,7 +98,7 @@ class provaFee(BitcoinTestFramework):
 
         ### Sidechain creation
         mcTest = CertTestUtils(self.options.tmpdir, self.options.srcdir)
-        vk = mcTest.generate_params(sc_name)
+        vk = mcTest.generate_params(sc_name) if scversion < 2 else mcTest.generate_params(sc_name, keyrot = True)
         constant = generate_random_field_element_hex()
         cmdInput = {
             "version": scversion,
@@ -142,9 +142,19 @@ class provaFee(BitcoinTestFramework):
         malicious_mbtr_fees = Decimal('0.07')
         quality = 10 if ceasable else 0
         addr_node3 = self.nodes[3].getnewaddress()
-        epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, not ceasable)
-        proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
+        epoch_number, epoch_cum_tree_hash, prev_cert_hash = get_epoch_data(scid, self.nodes[2], epoch_length, not ceasable)
+        proof = mcTest.create_test_proof(sc_name,
+                                         scid_swapped,
+                                         epoch_number,
+                                         quality,
+                                         malicious_mbtr_fees,
+                                         malicious_ft_fees,
+                                         epoch_cum_tree_hash,
+                                         prev_cert_hash = prev_cert_hash if scversion >= 2 else None,
+                                         constant       = constant,
+                                         pks            = [addr_node3],
+                                         amounts        = [bwt_amount])
+
         amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
 
         mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
@@ -220,9 +230,19 @@ class provaFee(BitcoinTestFramework):
         # 7.
         malicious_ft_fees = Decimal('0.07')
         malicious_mbtr_fees = Decimal('0.09')
-        epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, not ceasable)
-        proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
+        epoch_number, epoch_cum_tree_hash, prev_cert_hash = get_epoch_data(scid, self.nodes[2], epoch_length, not ceasable)
+        proof = mcTest.create_test_proof(sc_name,
+                                         scid_swapped,
+                                         epoch_number,
+                                         quality,
+                                         malicious_mbtr_fees,
+                                         malicious_ft_fees,
+                                         epoch_cum_tree_hash,
+                                         prev_cert_hash = prev_cert_hash if scversion >= 2 else None,
+                                         constant       = constant,
+                                         pks            = [addr_node3],
+                                         amounts        = [bwt_amount])
+
         amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
 
         mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
@@ -282,9 +302,19 @@ class provaFee(BitcoinTestFramework):
         # 11.
         malicious_ft_fees = Decimal('0.1')
         malicious_mbtr_fees = Decimal('0.11')
-        epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, not ceasable)
-        proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
+        epoch_number, epoch_cum_tree_hash, prev_cert_hash = get_epoch_data(scid, self.nodes[2], epoch_length, not ceasable)
+        proof = mcTest.create_test_proof(sc_name,
+                                         scid_swapped,
+                                         epoch_number,
+                                         quality,
+                                         malicious_mbtr_fees,
+                                         malicious_ft_fees,
+                                         epoch_cum_tree_hash,
+                                         prev_cert_hash = prev_cert_hash if scversion >= 2 else None,
+                                         constant       = constant,
+                                         pks            = [addr_node3],
+                                         amounts        = [bwt_amount])
+
         amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
 
         mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
@@ -324,7 +354,7 @@ class provaFee(BitcoinTestFramework):
 
         # Final check for de/serialization of scFees list
         final_scfeesLen = len(self.nodes[0].getscinfo(scid)['items'][0]['scFees'])
-        mark_logs("Checking persistance stopping and restarting nodes", self.nodes, DEBUG_MODE)
+        mark_logs("Checking persistence stopping and restarting nodes", self.nodes, DEBUG_MODE)
         stop_nodes(self.nodes)
         wait_bitcoinds()
         self.setup_network(False)
@@ -351,7 +381,7 @@ class provaFee(BitcoinTestFramework):
 
         ### Sidechain creation
         mcTest = CertTestUtils(self.options.tmpdir, self.options.srcdir)
-        vk = mcTest.generate_params(sc_name)
+        vk = mcTest.generate_params(sc_name, keyrot = True)
         constant = generate_random_field_element_hex()
         cmdInput = {
             "version": scversion,
@@ -414,9 +444,19 @@ class provaFee(BitcoinTestFramework):
         malicious_mbtr_fees = Decimal('0')
         quality = 0
         addr_node3 = self.nodes[3].getnewaddress()
-        epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount() - 4)
-        proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
+        epoch_number, epoch_cum_tree_hash, prev_cert_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount() - 2)
+        proof = mcTest.create_test_proof(sc_name,
+                                         scid_swapped,
+                                         epoch_number,
+                                         quality,
+                                         malicious_mbtr_fees,
+                                         malicious_ft_fees,
+                                         epoch_cum_tree_hash,
+                                         prev_cert_hash = prev_cert_hash if scversion >= 2 else None,
+                                         constant       = constant,
+                                         pks            = [addr_node3],
+                                         amounts        = [bwt_amount])
+
         amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
 
         mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
@@ -456,9 +496,19 @@ class provaFee(BitcoinTestFramework):
         # this certificate has ftr fee greater than those specified during sc creation
         malicious_ft_fees = Decimal('0.1')
         addr_node3 = self.nodes[3].getnewaddress()
-        epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount() - 4)
-        proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
+        epoch_number, epoch_cum_tree_hash, prev_cert_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount())
+        proof = mcTest.create_test_proof(sc_name,
+                                         scid_swapped,
+                                         epoch_number,
+                                         quality,
+                                         malicious_mbtr_fees,
+                                         malicious_ft_fees,
+                                         epoch_cum_tree_hash,
+                                         prev_cert_hash = prev_cert_hash if scversion >= 2 else None,
+                                         constant       = constant,
+                                         pks            = [addr_node3],
+                                         amounts        = [bwt_amount])
+
         amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
 
         mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
@@ -477,6 +527,7 @@ class provaFee(BitcoinTestFramework):
         sync_blocks(self.nodes[2:])
         sync_mempools(self.nodes[2:])
         self.assert_chain_height_difference(1)      # Test that the newly mined block is only on nodes 2 and 3
+
         # 5.
         mark_logs_temp(f"Net join", self.nodes, DEBUG_MODE, color='c')
         self.join_network()
@@ -495,7 +546,7 @@ class provaFee(BitcoinTestFramework):
         # making the transactions disappear
         else:
             incremental_fees = 0.1
-            for i in range(7):
+            for i in range(9):
                 self.assert_txs_in_mempool(NUM_TXS)         # Make sure that txs are only in nodes 0 and 1 mempool
 
                 mark_logs_temp(f"Net split", self.nodes, DEBUG_MODE, color='c')
@@ -504,9 +555,19 @@ class provaFee(BitcoinTestFramework):
                 incremental_fees = incremental_fees + 0.05
                 malicious_ft_fees = Decimal(str(incremental_fees))
                 addr_node3 = self.nodes[3].getnewaddress()
-                epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount() - 4)
-                proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                        malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
+                epoch_number, epoch_cum_tree_hash, prev_cert_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount())
+                proof = mcTest.create_test_proof(sc_name,
+                                                 scid_swapped,
+                                                 epoch_number,
+                                                 quality,
+                                                 malicious_mbtr_fees,
+                                                 malicious_ft_fees,
+                                                 epoch_cum_tree_hash,
+                                                 prev_cert_hash = prev_cert_hash if scversion >= 2 else None,
+                                                 constant       = constant,
+                                                 pks            = [addr_node3],
+                                                 amounts        = [bwt_amount])
+
                 amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
 
                 mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
@@ -530,54 +591,6 @@ class provaFee(BitcoinTestFramework):
                 sync_blocks(self.nodes)
                 self.assert_chain_height_difference(0)      # Make sure that block is propagated to nodes 0 and 1
 
-            # For the last two iterations, we send two certificates per block to ensure that we keep
-            # only the lower fees of each block
-            for j in range(2):
-                self.assert_txs_in_mempool(NUM_TXS)         # Make sure that txs are only in nodes 0 and 1 mempool
-                mark_logs_temp(f"Net split", self.nodes, DEBUG_MODE, color='c')
-                self.split_network()
-
-                for i in range(2):
-                    incremental_fees = incremental_fees + 0.05
-                    malicious_ft_fees = Decimal(str(incremental_fees))
-                    addr_node3 = self.nodes[3].getnewaddress()
-                    epoch_number, epoch_cum_tree_hash = get_epoch_data(scid, self.nodes[2], epoch_length, True, self.nodes[2].getblockcount() - 4 + i + j)
-                    proof = mcTest.create_test_proof(sc_name, scid_swapped, epoch_number, quality, malicious_mbtr_fees,
-                            malicious_ft_fees, epoch_cum_tree_hash, constant, [addr_node3], [bwt_amount])
-                    amount_cert_3 = [{"address": addr_node3, "amount": bwt_amount}]
-
-                    mark_logs_temp("Node 2 sends a certificate with increased fees", self.nodes, DEBUG_MODE, color='g')
-                    try:
-                        cert_epoch_0 = self.nodes[2].sc_send_certificate(scid, epoch_number, quality,
-                            epoch_cum_tree_hash, proof, amount_cert_3, malicious_ft_fees, malicious_mbtr_fees, CERT_FEE)
-                        assert(len(cert_epoch_0) > 0)
-                    except JSONRPCException as e:
-                        errorString = e.error['message']
-                        mark_logs_temp(f"Send certificate failed with reason {errorString}", self.nodes, DEBUG_MODE, color='r')
-                        assert(False)
-
-                mark_logs_temp(cc('e',"Node 2 mines 1 block to validate cert: ") + cert_epoch_0, self.nodes, DEBUG_MODE, color='n')
-                self.nodes[2].generate(1)
-                sync_blocks(self.nodes[2:])
-                sync_mempools(self.nodes[2:])
-                self.assert_chain_height_difference(1)      # Test that the newly mined block is only on nodes 2 and 3
-
-                mark_logs_temp(f"Net join", self.nodes, DEBUG_MODE, color='c')
-                self.join_network()
-                sync_blocks(self.nodes)
-                self.assert_chain_height_difference(0)      # Make sure that block is propagated to nodes 0 and 1
-
-            # Check that only the lowest fees have been kept
-            scFeesList = self.nodes[0].getscinfo(scid)['items'][0]['scFees']
-            # Difference between last and second to last should be 1.0
-            # Difference between second to last and third to last should be 0.5
-            # i.e. block # | ft fee
-            #        496   | 0.40
-            #        497   | 0.45 <- between 0.45 and 0.50 we keep 0.45
-            #        498   | 0.55 <- between 0.55 and 0.60 we keep 0.55
-            assert_equal(float(scFeesList[-1]['forwardTxScFee'] - scFeesList[-2]['forwardTxScFee']), 0.1)
-            assert_equal(float(scFeesList[-2]['forwardTxScFee'] - scFeesList[-3]['forwardTxScFee']), 0.05)
-
             # Finally, we are over the minScFeesBlocksUpdate border
             mark_logs_temp("Assert txs are no longer in mempool", self.nodes, DEBUG_MODE, color='y')
             self.assert_txs_in_mempool(0)                   # BOOM! Transactions should no longer be in mempool
@@ -585,8 +598,9 @@ class provaFee(BitcoinTestFramework):
             assert_equal(float(self.nodes[1].getbalance()), float(initial_balances[1]))
 
             # Final check for de/serialization of scFees list
+            scFeesList = self.nodes[0].getscinfo(scid)['items'][0]['scFees']
             final_scfeesLen = len(scFeesList)
-            mark_logs("Checking persistance stopping and restarting nodes", self.nodes, DEBUG_MODE)
+            mark_logs("Checking persistence stopping and restarting nodes", self.nodes, DEBUG_MODE)
             stop_nodes(self.nodes)
             wait_bitcoinds()
             self.setup_network(False)
@@ -601,7 +615,7 @@ class provaFee(BitcoinTestFramework):
         self.run_test_with_scversion(0)
         mark_logs_temp("*** SC version 2 - ceasable SC", self.nodes, DEBUG_MODE, color='b')
         self.run_test_with_scversion(2, True)
-        mark_logs_temp("*** SC version 2 - non-ceasable SC - after the update", self.nodes, DEBUG_MODE, color='b')
+        mark_logs_temp("*** SC version 2 - non-ceasable SC", self.nodes, DEBUG_MODE, color='b')
         self.run_test_non_ceasable(2, False, False)
 
 if __name__ == '__main__':

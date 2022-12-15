@@ -128,12 +128,12 @@ bool CSidechain::CheckQuality(const CScCertificate& cert) const
 bool CSidechain::CheckCertTiming(int certEpoch, int referencedHeight, const CCoinsViewCache& view) const {
     if (GetState(view) != State::ALIVE)
     {
-        return error("%s():%d - ERROR: certificate cannot be accepted, sidechain already ceased\n",
+        return error("%s():%d - ERROR: certificate cannot be accepted, sidechain not alive\n",
             __func__, __LINE__);
     }
 
-    // Adding handling of quality, we can have also certificates for the same epoch of the last certificate.
-    // The epoch number must be consistent with the sc certificate history (no old epoch allowed)
+    // The epoch number must be consistent with the sc certificate history
+    // (no old epoch allowed for ceasing, only consecutive epochs for non ceasing)
     if (isNonCeasing())
     {
         if (certEpoch != lastTopQualityCertReferencedEpoch + 1)
@@ -142,15 +142,17 @@ bool CSidechain::CheckCertTiming(int certEpoch, int referencedHeight, const CCoi
                     __func__, __LINE__, certEpoch, lastTopQualityCertReferencedEpoch + 1);
         }
 
-        // Check ordering of references
-        if (referencedHeight <= lastReferencedHeight)
+        // Check that every certificate references a block whose commitment tree includes the previous certificate.
+        // This also implies referencedHeight > ref_height_of_last_certificate
+        if (referencedHeight < lastInclusionHeight)
         {
-            return error("%s():%d - ERROR: certificate cannot be accepted, cert height (%d) not greater than last (%d)\n",
-                __func__, __LINE__, referencedHeight, lastReferencedHeight);
+            return error("%s():%d - ERROR: certificate cannot be accepted, cert reference height (%d) less than last certificate inclusion height (%d)\n",
+                __func__, __LINE__, referencedHeight, lastInclusionHeight);
         }
     }
     else
     {
+        // Adding handling of quality, we can have also certificates for the same epoch of the last certificate.
         if (certEpoch != lastTopQualityCertReferencedEpoch &&
             certEpoch != lastTopQualityCertReferencedEpoch + 1)
         {
@@ -267,7 +269,7 @@ std::string CSidechain::ToString() const
                       " lastTopQualityCertView=%s\n"
                       " lastTopQualityCertHash=%s\n lastTopQualityCertReferencedEpoch=%d\n"
                       " lastTopQualityCertQuality=%d\n"
-                      " lastReferencedHeight=%d\n lastInclusionHeight=%d\n"
+                      " lastInclusionHeight=%d\n"
                       " lastTopQualityCertBwtAmount=%s\n balance=%s\n"
                       " fixedParams=[NOT PRINTED CURRENTLY]\n mImmatureAmounts=[NOT PRINTED CURRENTLY])",
         fixedParams.version
@@ -278,7 +280,6 @@ std::string CSidechain::ToString() const
         , lastTopQualityCertHash.ToString()
         , lastTopQualityCertReferencedEpoch
         , lastTopQualityCertQuality
-        , lastReferencedHeight
         , lastInclusionHeight
         , FormatMoney(lastTopQualityCertBwtAmount)
         , FormatMoney(balance)
@@ -742,7 +743,7 @@ void CSidechain::InitScFees()
                                 lastTopQualityCertView.mainchainBackwardTransferRequestScFee));
         } else {
             scFees.emplace_back(new Sidechain::ScFeeData_v2(lastTopQualityCertView.forwardTransferScFee,
-                                lastTopQualityCertView.mainchainBackwardTransferRequestScFee, lastReferencedHeight));
+                                lastTopQualityCertView.mainchainBackwardTransferRequestScFee, lastInclusionHeight));
         }
     }
 }
