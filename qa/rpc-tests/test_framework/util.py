@@ -460,6 +460,10 @@ def assert_greater_than(thing1, thing2):
     if thing1 <= thing2:
         raise AssertionError("%s <= %s"%(str(thing1),str(thing2)))
 
+def assert_greater_or_equal_than(thing1, thing2):
+    if thing1 < thing2:
+        raise AssertionError("%s <= %s"%(str(thing1),str(thing2)))
+
 def assert_raises(exc, fun, *args, **kwds):
     try:
         fun(*args, **kwds)
@@ -499,7 +503,7 @@ def wait_and_assert_operationid_status(node, myopid, in_status='success', in_err
     assert_equal(in_status, status, "Operation returned mismatched status. Error Message: {}".format(errormsg))
 
     if errormsg is not None:
-        assert_true(in_errormsg is not None, "No error retured. Expected: {}".format(errormsg))
+        assert_true(in_errormsg is not None, "No error returned. Expected: {}".format(errormsg))
         assert_true(in_errormsg in errormsg, "Error returned: {}. Error expected: {}".format(errormsg, in_errormsg))
         return result # if there was an error return the result
     else:

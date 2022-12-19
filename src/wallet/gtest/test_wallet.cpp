@@ -144,7 +144,6 @@ TEST(wallet_tests, note_data_serialisation) {
     EXPECT_EQ(noteData[jsoutpt].witnesses, noteData2[jsoutpt].witnesses);
 }
 
-
 TEST(wallet_tests, find_unspent_notes) {
     SelectParams(CBaseChainParams::TESTNET);
     CWallet wallet;
