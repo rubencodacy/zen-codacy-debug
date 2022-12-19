@@ -68,7 +68,7 @@ class PaymentDisclosureTest (BitcoinTestFramework):
         # Shield coinbase utxos from node 0 of value 40, standard fee of 0.00010000
         recipients = [{"address":myzaddr, "amount":Decimal('45.75')-Decimal('0.0001')}]
         myopid = self.nodes[0].z_sendmany(mytaddr, recipients)
-        txid = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        txid = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
 
         # Check the tx has joinsplits
         assert( len(self.nodes[0].getrawtransaction("" + txid, 1)["vjoinsplit"]) > 0 )
@@ -167,7 +167,7 @@ class PaymentDisclosureTest (BitcoinTestFramework):
         node1zaddr = self.nodes[1].z_getnewaddress()
         recipients = [{"address":node1zaddr, "amount":Decimal('1')}]
         myopid = self.nodes[0].z_sendmany(myzaddr, recipients)
-        txid = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        txid = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()

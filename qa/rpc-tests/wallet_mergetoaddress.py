@@ -56,7 +56,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         # Shield the coinbase
         myzaddr = self.nodes[0].z_getnewaddress()
         result = self.nodes[0].z_shieldcoinbase("*", myzaddr, 0)
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -71,7 +71,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
             {'address': mytaddr2, 'amount': 10},
             {'address': mytaddr3, 'amount': 10},
             ], 1, 0)
-        wait_and_assert_operationid_status(self.nodes[0], result)
+        wait_and_assert_operationid_status(self.nodes[0], result, timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -159,7 +159,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
 
         # Merge UTXOs from node 0 of value 30, standard fee of 0.00010000
         result = self.nodes[0].z_mergetoaddress([mytaddr, mytaddr2, mytaddr3], myzaddr)
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -178,7 +178,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         assert_equal(result["remainingUTXOs"], Decimal('0'))
         assert_equal(result["mergingNotes"], Decimal('2'))
         assert_equal(result["remainingNotes"], Decimal('0'))
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         self.sync_all()
         blockhash = self.nodes[1].generate(1)
         self.sync_all()
@@ -189,7 +189,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
 
         # Shield coinbase UTXOs from any node 2 taddr, and set fee to 0
         result = self.nodes[2].z_shieldcoinbase("*", myzaddr, 0)
-        wait_and_assert_operationid_status(self.nodes[2], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[2], result['opid'], timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -202,7 +202,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
 
         # Merge all notes from node 0 into a node 0 taddr, and set fee to 0
         result = self.nodes[0].z_mergetoaddress(["ANY_ZADDR"], mytaddr, 0)
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -219,7 +219,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         self.nodes[1].getnewaddress() # Ensure we have an empty address
         n1taddr = self.nodes[1].getnewaddress()
         result = self.nodes[0].z_mergetoaddress(["ANY_TADDR"], n1taddr, 0)
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -270,8 +270,8 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         opid2 = result['opid']
 
         # wait for both aysnc operations to complete
-        wait_and_assert_operationid_status(self.nodes[0], opid1)
-        wait_and_assert_operationid_status(self.nodes[0], opid2)
+        wait_and_assert_operationid_status(self.nodes[0], opid1, timeout=600)
+        wait_and_assert_operationid_status(self.nodes[0], opid2, timeout=600)
 
         # sync_all() invokes sync_mempool() but node 2's mempool limit will cause tx1 and tx2 to be rejected.
         # So instead, we sync on blocks and mempool for node 0 and node 1, and after a new block is generated
@@ -290,7 +290,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         assert_equal(result["remainingUTXOs"], Decimal('13'))
         assert_equal(result["mergingNotes"], Decimal('0'))
         assert_equal(result["remainingNotes"], Decimal('0'))
-        wait_and_assert_operationid_status(self.nodes[2], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[2], result['opid'], timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -307,7 +307,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         assert_equal(result["mergingNotes"], Decimal('0'))
         # Remaining notes are only counted if we are trying to merge any notes
         assert_equal(result["remainingNotes"], Decimal('0'))
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         sync_blocks(self.nodes[:2])
         sync_mempools(self.nodes[:2])
 
@@ -318,7 +318,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         assert_equal(result["mergingNotes"], Decimal('0'))
         # Remaining notes are only counted if we are trying to merge any notes
         assert_equal(result["remainingNotes"], Decimal('0'))
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         # Don't sync node 2 which rejects the tx due to its mempooltxinputlimit
         sync_blocks(self.nodes[:2])
         sync_mempools(self.nodes[:2])
@@ -344,8 +344,8 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         assert_equal(result2["remainingUTXOs"], Decimal('0'))
         assert_equal(result2["mergingNotes"], Decimal('2'))
         assert_equal(result2["remainingNotes"], Decimal('1'))
-        wait_and_assert_operationid_status(self.nodes[0], result1['opid'])
-        wait_and_assert_operationid_status(self.nodes[0], result2['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result1['opid'], timeout=600)
+        wait_and_assert_operationid_status(self.nodes[0], result2['opid'], timeout=600)
 
         self.sync_all()
         self.nodes[1].generate(1)
@@ -357,7 +357,7 @@ class WalletMergeToAddressTest (BitcoinTestFramework):
         assert_equal(result["remainingUTXOs"], Decimal('7'))
         assert_equal(result["mergingNotes"], Decimal('2'))
         assert_equal(result["remainingNotes"], Decimal('1'))
-        wait_and_assert_operationid_status(self.nodes[0], result['opid'])
+        wait_and_assert_operationid_status(self.nodes[0], result['opid'], timeout=600)
         # Don't sync node 2 which rejects the tx due to its mempooltxinputlimit
         sync_blocks(self.nodes[:2])
         sync_mempools(self.nodes[:2])

@@ -53,7 +53,7 @@ class Wallet1941RegressionTest (BitcoinTestFramework):
         recipients = []
         recipients.append({"address":myzaddr, "amount":Decimal('11.4375') - Decimal('0.0001')})
         myopid = self.nodes[0].z_sendmany(mytaddr, recipients)
-        wait_and_assert_operationid_status(self.nodes[0], myopid)
+        wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
         self.nodes[0].generate(1)
 
         # Ensure the block times of the latest blocks exceed the variability

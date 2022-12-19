@@ -41,11 +41,10 @@ class WalletProtectCoinbaseTest (BitcoinTestFramework):
         self.sync_all()
 
     # Returns txid if operation was a success or None
-    def wait_and_assert_operationid_status(self, myopid, in_status='success', in_errormsg=None):
+    def wait_and_assert_operationid_status(self, myopid, in_status='success', in_errormsg=None, timeout=800):
         print('waiting for async operation {}'.format(myopid))
         opids = []
         opids.append(myopid)
-        timeout = 500
         status = None
         errormsg = None
         txid = None
@@ -162,7 +161,7 @@ class WalletProtectCoinbaseTest (BitcoinTestFramework):
         recipients = []
         recipients.append({"address":myzaddr, "amount": Decimal('22.875') - Decimal('0.0001')})
         myopid = self.nodes[0].z_sendmany(mytaddr, recipients)
-        mytxid = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        mytxid = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
         self.sync_all()
 
         # Verify that z_listunspent can return a note that has zero confirmations
@@ -229,7 +228,7 @@ class WalletProtectCoinbaseTest (BitcoinTestFramework):
         recipients = []
         recipients.append({"address":myzaddr, "amount": Decimal('22.8749')})
         myopid = self.nodes[0].z_sendmany(myzaddr, recipients, 1, Decimal('0.0'))
-        mytxid = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        mytxid = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()
@@ -246,7 +245,7 @@ class WalletProtectCoinbaseTest (BitcoinTestFramework):
         recipients = []
         recipients.append({"address":mytaddr, "amount":Decimal('11.4375')})
         myopid = self.nodes[0].z_sendmany(myzaddr, recipients)
-        mytxid = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        mytxid = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
         assert(mytxid is not None)
         self.sync_all()
 
@@ -324,7 +323,7 @@ class WalletProtectCoinbaseTest (BitcoinTestFramework):
 
         myopid = self.nodes[0].z_sendmany(myzaddr, recipients)
         try:
-            wait_and_assert_operationid_status(self.nodes[0], myopid)
+            wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
         except JSONRPCException as e:
             print("JSONRPC error: "+e.error['message'])
             assert(False)
@@ -389,7 +388,7 @@ class WalletProtectCoinbaseTest (BitcoinTestFramework):
             newzaddr = self.nodes[2].z_getnewaddress()
             recipients.append({"address":newzaddr, "amount":amount_per_recipient})
         myopid = self.nodes[0].z_sendmany(myzaddr, recipients, minconf, custom_fee)
-        wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=900)
+        wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=1200)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()

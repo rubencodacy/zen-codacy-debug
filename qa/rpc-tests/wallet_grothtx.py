@@ -51,14 +51,14 @@ class WalletGrothTxTest (BitcoinTestFramework):
         recipients = []
         recipients.append({"address":taddr1, "amount": Decimal('0.5')})
         myopid = self.nodes[2].z_sendmany(taddr2, recipients, 0)
-        txid_zsendmany = wait_and_assert_operationid_status(self.nodes[2], myopid)
+        txid_zsendmany = wait_and_assert_operationid_status(self.nodes[2], myopid, timeout=600)
 
         # Node 0 shields to Node 2, a coinbase utxo of value 10.0 less fee 0.00010000
         zsendamount = Decimal(BLOCK_REWARD_BELOW_100) - Decimal('0.0001')
         recipients = []
         recipients.append({"address":zaddr2, "amount": zsendamount})
         myopid = self.nodes[0].z_sendmany(taddr0, recipients)
-        txid_shielded = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        txid_shielded = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
 
         self.sync_all()
         self.nodes[0].generate(1)
@@ -86,14 +86,14 @@ class WalletGrothTxTest (BitcoinTestFramework):
         recipients = []
         recipients.append({"address":taddr1, "amount": Decimal('0.5')})
         myopid = self.nodes[3].z_sendmany(taddr3, recipients, 0)
-        txid_zsendmany = wait_and_assert_operationid_status(self.nodes[3], myopid)
+        txid_zsendmany = wait_and_assert_operationid_status(self.nodes[3], myopid, timeout=600)
 
         # Node 0 shields to Node 3, a coinbase utxo of value 10.0 less fee 0.00010000
         zsendamount = Decimal(BLOCK_REWARD_BELOW_100) - Decimal('0.0001')
         recipients = []
         recipients.append({"address":zaddr3, "amount": zsendamount})
         myopid = self.nodes[0].z_sendmany(taddr0, recipients)
-        txid_shielded = wait_and_assert_operationid_status(self.nodes[0], myopid)
+        txid_shielded = wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
 
         # Mine the first Groth block
         self.sync_all()
