@@ -1148,7 +1148,7 @@ struct CMutableTransaction : public CMutableTransactionBase
 };
 
 //! Struct for storing transaction subsections size info
-struct CBaseTransactionSizeInfo
+struct CBaseTransactionSizeEstimation
 {
     size_t overheadSize = 0;
     size_t baseInputsSize = 0;
@@ -1156,7 +1156,7 @@ struct CBaseTransactionSizeInfo
     size_t baseOutputChangeOnlySize = 0;
 };
 
-struct CTransactionSizeInfo : CBaseTransactionSizeInfo
+struct CTransactionSizeEstimation : CBaseTransactionSizeEstimation
 {
     size_t joinsplitsSize = 0;
     size_t sidechainInputsSize = 0;
