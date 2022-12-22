@@ -11,6 +11,7 @@
 
 //! Flag for profiling/debugging mode
 #define COINS_SELECTION_ALGORITHM_PROFILING 0
+
 //! This represents the number of intermediate change levels inside the interval [targetAmount + 0, targetAmount + maxChange]
 /*!
   Low value -> higher quantity of selected utxos and higher change, high value -> lower quantity of selected utxos and lower change

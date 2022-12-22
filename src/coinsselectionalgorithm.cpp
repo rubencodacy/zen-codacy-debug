@@ -1,8 +1,10 @@
 #include "coinsselectionalgorithm.hpp"
-#include <chrono>
 #include <cstdio>
 #include <iostream>
 #include <string>
+#if COINS_SELECTION_ALGORITHM_PROFILING
+#include <chrono>
+#endif
 
 /* ---------- CCoinsSelectionAlgorithmBase ---------- */
 
