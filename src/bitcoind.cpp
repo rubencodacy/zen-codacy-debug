@@ -57,8 +57,136 @@ void WaitForShutdown(boost::thread_group* threadGroup)
 //
 // Start
 //
+#include "coinsselectionalgorithm.hpp"
+
 bool AppInit(int argc, char* argv[])
 {
+    {
+        std::vector<std::pair<CAmount, size_t>> amountsAndSizes;
+        amountsAndSizes.push_back(std::make_pair(55, 148));
+        amountsAndSizes.push_back(std::make_pair(50, 147));
+        amountsAndSizes.push_back(std::make_pair(54, 148));
+        amountsAndSizes.push_back(std::make_pair(55, 147));
+        amountsAndSizes.push_back(std::make_pair(51, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(10, 148));
+        amountsAndSizes.push_back(std::make_pair(12, 147));
+        amountsAndSizes.push_back(std::make_pair(21, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(10, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(10, 148));
+        amountsAndSizes.push_back(std::make_pair( 9, 147));
+        amountsAndSizes.push_back(std::make_pair(11, 148));
+        amountsAndSizes.push_back(std::make_pair(15, 147));
+        amountsAndSizes.push_back(std::make_pair(10, 148));
+        amountsAndSizes.push_back(std::make_pair(16, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(14, 147));
+        amountsAndSizes.push_back(std::make_pair(12, 148));
+        amountsAndSizes.push_back(std::make_pair(11, 147));
+        amountsAndSizes.push_back(std::make_pair(19, 148));
+        amountsAndSizes.push_back(std::make_pair(19, 147));
+        amountsAndSizes.push_back(std::make_pair(11, 148));
+        amountsAndSizes.push_back(std::make_pair(12, 147));
+        amountsAndSizes.push_back(std::make_pair(13, 148));
+        amountsAndSizes.push_back(std::make_pair(14, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(16, 147));
+        amountsAndSizes.push_back(std::make_pair(17, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(19, 148));
+        amountsAndSizes.push_back(std::make_pair(11, 147));
+        amountsAndSizes.push_back(std::make_pair(12, 148));
+        amountsAndSizes.push_back(std::make_pair(13, 147));
+        amountsAndSizes.push_back(std::make_pair(14, 148));
+        amountsAndSizes.push_back(std::make_pair(12, 147));
+        amountsAndSizes.push_back(std::make_pair(16, 148));
+        amountsAndSizes.push_back(std::make_pair( 9, 147));
+        amountsAndSizes.push_back(std::make_pair(18, 148));
+        amountsAndSizes.push_back(std::make_pair(19, 147));
+        amountsAndSizes.push_back(std::make_pair(19, 148));
+        amountsAndSizes.push_back(std::make_pair(20, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(19, 147));
+        amountsAndSizes.push_back(std::make_pair( 9, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair( 9, 148));
+        amountsAndSizes.push_back(std::make_pair(11, 147));
+        amountsAndSizes.push_back(std::make_pair(11, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(13, 148));
+        amountsAndSizes.push_back(std::make_pair(14, 147));
+        amountsAndSizes.push_back(std::make_pair(19, 148));
+        amountsAndSizes.push_back(std::make_pair(15, 147));
+        amountsAndSizes.push_back(std::make_pair(14, 148));
+        amountsAndSizes.push_back(std::make_pair(16, 147));
+        amountsAndSizes.push_back(std::make_pair(11, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(20, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(10, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(16, 147));
+        amountsAndSizes.push_back(std::make_pair(18, 148));
+        amountsAndSizes.push_back(std::make_pair(17, 147));
+        amountsAndSizes.push_back(std::make_pair(17, 148));
+        amountsAndSizes.push_back(std::make_pair(11, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(14, 147));
+        amountsAndSizes.push_back(std::make_pair(18, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(12, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(19, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair( 9, 147));
+        amountsAndSizes.push_back(std::make_pair(20, 148));
+        amountsAndSizes.push_back(std::make_pair(20, 147));
+        amountsAndSizes.push_back(std::make_pair( 9, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(11, 148));
+        amountsAndSizes.push_back(std::make_pair(19, 147));
+        amountsAndSizes.push_back(std::make_pair(17, 148));
+        amountsAndSizes.push_back(std::make_pair(14, 147));
+        amountsAndSizes.push_back(std::make_pair(12, 148));
+        amountsAndSizes.push_back(std::make_pair(18, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(15, 147));
+        amountsAndSizes.push_back(std::make_pair(17, 148));
+        amountsAndSizes.push_back(std::make_pair(16, 147));
+        amountsAndSizes.push_back(std::make_pair(15, 148));
+        amountsAndSizes.push_back(std::make_pair(10, 147));
+        amountsAndSizes.push_back(std::make_pair(10, 148));
+        amountsAndSizes.push_back(std::make_pair(11, 147));
+
+        uint64_t overallTime = 0;
+        freopen ("myfile.txt","a",stdout);
+        std::cout << "RUN;TIME" << "\n" << std::flush;
+        for (int run = 0; run < 10; ++run)
+        {
+            CCoinsSelectionSlidingWindow algoSW(amountsAndSizes, 50, 60, 14700);
+            algoSW.Solve();
+
+            CCoinsSelectionBranchAndBound algoBB(amountsAndSizes, 50, 60, 14700);
+            uint64_t microsecondsBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            algoBB.Solve();
+            uint64_t microsecondsAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+            //check result
+
+            overallTime += (microsecondsAfter - microsecondsBefore);
+            std::cout << std::to_string(run) << ";" << std::to_string(microsecondsAfter - microsecondsBefore) << "\n" << std::flush;
+        }
+        std::cout << "OVERALL;" << std::to_string(overallTime) << "\n" << std::flush;
+
+        return false;
+    }
+
     boost::thread_group threadGroup;
     CScheduler scheduler;
 
