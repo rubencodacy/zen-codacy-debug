@@ -38,7 +38,7 @@ class CCoinsSelectionAlgorithmBase
 protected:
     // ---------- auxiliary
     //! The temporary set of selected elements (true->selected, false->unselected)
-    bool* tempSelection;
+    std::vector<bool> tempSelection;
 
     //! Max index of elements (equal to "problemDimension - 1")
     const unsigned int maxIndex;
@@ -65,7 +65,7 @@ protected:
 
     // ---------- output variables
     //! The optimal set of selected elements (true->selected, false->unselected)
-    bool* optimalSelection;
+    std::vector<bool> optimalSelection;
 
     //! The total amount of optimal selection
     CAmount optimalTotalAmount;
@@ -86,10 +86,10 @@ public:
     const unsigned int problemDimension;
 
     //! The array of amounts
-    const CAmount* amounts;
+    const std::vector<CAmount> amounts;
 
     //! The array of sizes (in terms of bytes of the associated input)
-    const size_t* sizes;
+    const std::vector<size_t> sizes;
 
     //! The target amount to satisfy (it is a lower-limit constraint)
     const CAmount targetAmount;
@@ -107,14 +107,14 @@ private:
       \param amountsAndSizes vector of pairs of amounts and sizes of the elements
       \return the array of amounts in descending order
     */
-    CAmount* PrepareAmounts(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes);
+    std::vector<CAmount> PrepareAmounts(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes);
 
     //! Method for preparing array of sizes (expects descending order with respect to amounts)
     /*!
       \param amountsAndSizes vector of pairs of amounts and sizes of the elements
       \return the array of sizes
     */
-    size_t* PrepareSizes(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes);
+    std::vector<size_t> PrepareSizes(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes);
 
 protected:
     //! Method for resetting internal variables (must be called before restarting the algorithm)
@@ -183,7 +183,7 @@ public:
     #endif
 
     //! Method for getting the optimal set of selected elements (true->selected, false->unselected)
-    bool* GetOptimalSelection();
+    std::vector<bool> GetOptimalSelection();
 
     //! Method for getting the total amount of optimal selection
     CAmount GetOptimalTotalAmount();
@@ -296,7 +296,7 @@ class CCoinsSelectionBranchAndBound : public CCoinsSelectionAlgorithmBase
 protected:
     // ---------- auxiliary
     //! The array of cumulative amounts (considered summing amounts from index to end of amounts array)
-    const CAmount* cumulativeAmountsForward;
+    const std::vector<CAmount> cumulativeAmountsForward;
     // ---------- auxiliary
 
     // ---------- profiling
@@ -317,7 +317,7 @@ private:
     /*!
       \return the array of cumulative amounts
     */
-    CAmount* PrepareCumulativeAmountsForward();
+    std::vector<CAmount> PrepareCumulativeAmountsForward();
 
     //! Method for synchronously running the solving routine recursion with "Branch & Bound" strategy
     /*!
@@ -405,15 +405,8 @@ protected:
     const unsigned int numberOfJoinsplitsOutputsAmounts;
 
     //! Joinsplits outputs amounts
-    CAmount* joinsplitsOutputsAmounts;
+    std::vector<CAmount> joinsplitsOutputsAmounts;
     // ---------- input variables
-
-private:
-    //! Method for preparing array of joinsplits outputs amounts
-    /*!
-      \return the array of cumulative amounts
-    */
-    CAmount* PrepareJoinsplitsOutputsAmounts(std::vector<CAmount> joinsplitsOutputsAmounts);
 
 protected:
     //! Method for resetting internal variables (must be called before restarting the algorithm)
