@@ -270,10 +270,6 @@ if [ "x${ENABLE_BITCOIND}${ENABLE_UTILS}${ENABLE_WALLET}" = "x111" ]; then
                       "*/depends/x86_64-unknown-linux-gnu/include/boost/*" \
                       "*/depends/x86_64-unknown-linux-gnu/include/gmock/*" \
                       "*/depends/x86_64-unknown-linux-gnu/include/gtest/*" \
-                      "*/depends/x86_64-linux-gnu/include/*.h" \
-                      "*/depends/x86_64-linux-gnu/include/boost/*" \
-                      "*/depends/x86_64-linux-gnu/include/gmock/*" \
-                      "*/depends/x86_64-linux-gnu/include/gtest/*" \
                       "*/src/gtest/*" \
                       "*/src/test/*" \
                       "*/src/wallet/gtest/*" \
@@ -301,10 +297,6 @@ if [ "x${ENABLE_BITCOIND}${ENABLE_UTILS}${ENABLE_WALLET}" = "x111" ]; then
         "*/depends/x86_64-unknown-linux-gnu/include/boost/*" \
         "*/depends/x86_64-unknown-linux-gnu/include/gmock/*" \
         "*/depends/x86_64-unknown-linux-gnu/include/gtest/*" \
-        "*/depends/x86_64-linux-gnu/include/*.h" \
-        "*/depends/x86_64-linux-gnu/include/boost/*" \
-        "*/depends/x86_64-linux-gnu/include/gmock/*" \
-        "*/depends/x86_64-linux-gnu/include/gtest/*" \
         "*/src/gtest/*" \
         "*/src/test/*" \
         "*/src/wallet/gtest/*" \
