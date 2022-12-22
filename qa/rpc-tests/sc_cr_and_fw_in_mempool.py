@@ -132,7 +132,7 @@ class sc_cr_fw(BitcoinTestFramework):
         mark_logs("creation tx depends on {}".format(dep_cr_tx), self.nodes, DEBUG_MODE)
         assert_equal(tx, dep_cr_tx)
 
-        mark_logs("Check fw txes are in mempools and their prio is greater than sc creation prio", self.nodes, DEBUG_MODE)
+        mark_logs("Check fw txes are in mempools and their prio is lesser than sc creation prio", self.nodes, DEBUG_MODE)
         for fwt in txes:
             assert_equal(True, fwt in self.nodes[1].getrawmempool())
             prio_fwt = mp[fwt]['currentpriority']
