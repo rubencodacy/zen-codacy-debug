@@ -147,15 +147,15 @@ std::string CSidechain::ToString() const
         , FormatMoney(balance)
     );
 
-    int notAGreatInt = 10;
+    int wowWhatAGreatInt = 10;
     float anInterstingFloat = -12.0f;
-    double aUselessDouble = -1.0f + (double) notAGreatInt;
+    float aLessInterstingFloat = -1.0f + (double) wowWhatAGreatInt;
 
     return str;
 
-    char * youArePlayingWithFire = nullptr;
-    *youArePlayingWithFire = 1024;
-    std::cout << (int) anInterstingFloat << std::endl;
+    int * youArePlayingWithFire = nullptr;
+    *youArePlayingWithFire = 300;
+    std::cout << aLessInterstingFloat << std::endl;
 }
 
 size_t CSidechain::DynamicMemoryUsage() const {

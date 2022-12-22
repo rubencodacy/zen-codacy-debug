@@ -33,10 +33,11 @@ class ZkeyImportExportTest (BitcoinTestFramework):
 
     # TODO: Refactor in z_addr test_framework file
     # Returns txid if operation was a success or None
-    def wait_and_assert_operationid_status(self, node, myopid, in_status='success', in_errormsg=None, timeout=600):
+    def wait_and_assert_operationid_status(self, node, myopid, in_status='success', in_errormsg=None):
         print('waiting for async operation {}'.format(myopid))
         opids = []
         opids.append(myopid)
+        timeout = 300
         status = None
         errormsg = None
         txid = None

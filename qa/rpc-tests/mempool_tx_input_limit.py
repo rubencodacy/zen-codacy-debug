@@ -33,7 +33,7 @@ class MempoolTxInputLimitTest(BitcoinTestFramework):
         recipients = []
         recipients.append({"address": to_addr, "amount": amount})
         myopid = self.nodes[0].z_sendmany(from_addr, recipients)
-        return wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
+        return wait_and_assert_operationid_status(self.nodes[0], myopid)
 
     def run_test(self):
         self.nodes[0].generate(100)
@@ -99,7 +99,7 @@ class MempoolTxInputLimitTest(BitcoinTestFramework):
         recipients.append({"address":self.nodes[1].getnewaddress(), "amount": spend_taddr_amount - spend_taddr_output - spend_taddr_output})
 
         myopid = self.nodes[0].z_sendmany(node0_zaddr, recipients)
-        wait_and_assert_operationid_status(self.nodes[0], myopid, timeout=600)
+        wait_and_assert_operationid_status(self.nodes[0], myopid)
         self.sync_all()
         self.nodes[1].generate(1)
         self.sync_all()

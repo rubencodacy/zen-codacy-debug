@@ -21,6 +21,34 @@ class ZSendmanyTest(BitcoinTestFramework):
         self.is_network_split=False
         self.sync_all()
 
+    # Returns txid if operation was a success or None
+    def wait_and_assert_operationid_status(self, myopid, in_status='success', in_errormsg=None):
+        print('waiting for async operation {}'.format(myopid))
+        opids = []
+        opids.append(myopid)
+        timeout = 500
+        status = None
+        errormsg = None
+        txid = None
+        for x in range(1, timeout):
+            results = self.nodes[0].z_getoperationresult(opids)
+            if len(results)==0:
+                time.sleep(1)
+            else:
+                status = results[0]["status"]
+                if status == "failed":
+                    errormsg = results[0]['error']['message']
+                elif status == "success":
+                    txid = results[0]['result']['txid']
+                break
+        print('...returned status: {}'.format(status))
+        assert_equal(in_status, status)
+        if errormsg is not None:
+            assert(in_errormsg is not None)
+            assert_equal(in_errormsg in errormsg, True)
+            print('...returned error: {}'.format(errormsg))
+        return txid
+
     def run_test (self):
         print("Mining blocks...")
 
@@ -43,7 +71,7 @@ class ZSendmanyTest(BitcoinTestFramework):
         ZDestAddress = self.nodes[2].z_getnewaddress()
         recipients= [{"address":ZDestAddress, "amount": amount}]
         myopid = self.nodes[1].z_sendmany(fromAddress,recipients,1,self.FEE, True)
-        txid = wait_and_assert_operationid_status(self.nodes[1], myopid, timeout=600)
+        txid = wait_and_assert_operationid_status(self.nodes[1], myopid)
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()
@@ -59,7 +87,7 @@ class ZSendmanyTest(BitcoinTestFramework):
         TDestAddress = self.nodes[2].getnewaddress()
         recipients= [{"address":TDestAddress, "amount": amount}]
         myopid = self.nodes[1].z_sendmany(fromAddress,recipients,1,self.FEE, True)
-        txid = wait_and_assert_operationid_status(self.nodes[1], myopid, timeout=600)
+        txid = wait_and_assert_operationid_status(self.nodes[1], myopid)
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()
@@ -78,7 +106,7 @@ class ZSendmanyTest(BitcoinTestFramework):
         #Send 10 Zen to Taddress and verify the change is sent to a new address
         recipients= [{"address":TDestAddress, "amount": amount}]
         myopid = self.nodes[1].z_sendmany(fromAddress,recipients,1,self.FEE, False)
-        txid = wait_and_assert_operationid_status(self.nodes[1], myopid, timeout=600)
+        txid = wait_and_assert_operationid_status(self.nodes[1], myopid)
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()
@@ -97,7 +125,7 @@ class ZSendmanyTest(BitcoinTestFramework):
         #Send 10 Zen to Taddress and verify the change is sent to a new address
         recipients= [{"address":fromAddress, "amount": amount}]
         myopid = self.nodes[2].z_sendmany(TDestAddress,recipients)
-        txid = wait_and_assert_operationid_status(self.nodes[2], myopid, timeout=600)
+        txid = wait_and_assert_operationid_status(self.nodes[2], myopid)
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()
@@ -126,7 +154,7 @@ class ZSendmanyTest(BitcoinTestFramework):
 
         recipients= [{"address":TDestAddress, "amount": 10.0}]
         myopid = self.nodes[1].z_sendmany(mSigObj,recipients,1,self.FEE, True)
-        txid = wait_and_assert_operationid_status(self.nodes[1], myopid, timeout=600)
+        txid = wait_and_assert_operationid_status(self.nodes[1], myopid)
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()
