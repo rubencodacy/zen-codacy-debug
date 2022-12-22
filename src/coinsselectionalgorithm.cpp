@@ -23,8 +23,8 @@ CCoinsSelectionAlgorithmBase::CCoinsSelectionAlgorithmBase(CoinsSelectionAlgorit
                                                      targetAmountPlusOffset {_targetAmountPlusOffset},
                                                      availableTotalSize {_availableTotalSize}
 {
-    tempSelection = std::vector<bool>(problemDimension, false);    
-    optimalSelection = std::vector<bool>(problemDimension, false);
+    tempSelection = std::unique_ptr<bool[]>(new bool[problemDimension]{});
+    optimalSelection = std::unique_ptr<bool[]>(new bool[problemDimension]{});
 
     optimalTotalAmount = 0;
     optimalTotalSize = 0;
@@ -45,10 +45,10 @@ CCoinsSelectionAlgorithmBase::~CCoinsSelectionAlgorithmBase()
     StopSolving();
 }
 
-std::vector<CAmount> CCoinsSelectionAlgorithmBase::PrepareAmounts(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes)
+CAmount* CCoinsSelectionAlgorithmBase::PrepareAmounts(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes)
 {
     std::sort(amountsAndSizes.begin(), amountsAndSizes.end(), std::greater<>());
-    std::vector<CAmount> sortedAmounts(amountsAndSizes.size(), 0);
+    CAmount* sortedAmounts = new CAmount[problemDimension];
     for (int index = 0; index < problemDimension; ++index)
     {
         sortedAmounts[index] = amountsAndSizes[index].first;
@@ -56,9 +56,9 @@ std::vector<CAmount> CCoinsSelectionAlgorithmBase::PrepareAmounts(std::vector<st
     return sortedAmounts;
 }
 
-std::vector<size_t> CCoinsSelectionAlgorithmBase::PrepareSizes(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes)
+size_t* CCoinsSelectionAlgorithmBase::PrepareSizes(std::vector<std::pair<CAmount, size_t>>& amountsAndSizes)
 {
-    std::vector<size_t> sortedSizes(amountsAndSizes.size(), 0);
+    size_t* sortedSizes = new size_t[problemDimension];
     for (int index = 0; index < problemDimension; ++index)
     {
         sortedSizes[index] = amountsAndSizes[index].second;
@@ -145,9 +145,9 @@ uint64_t CCoinsSelectionAlgorithmBase::GetExecutionMicroseconds()
 }
 #endif
 
-std::vector<bool> CCoinsSelectionAlgorithmBase::GetOptimalSelection()
+bool* CCoinsSelectionAlgorithmBase::GetOptimalSelection()
 {
-    return optimalSelection;
+    return optimalSelection.get();
 }
 
 CAmount CCoinsSelectionAlgorithmBase::GetOptimalTotalAmount()
@@ -305,9 +305,9 @@ CCoinsSelectionBranchAndBound::CCoinsSelectionBranchAndBound(std::vector<std::pa
 CCoinsSelectionBranchAndBound::~CCoinsSelectionBranchAndBound() {
 }
 
-std::vector<CAmount> CCoinsSelectionBranchAndBound::PrepareCumulativeAmountsForward()
+CAmount* CCoinsSelectionBranchAndBound::PrepareCumulativeAmountsForward()
 {
-    std::vector<CAmount> cumulativeAmountsForwardTemp(problemDimension + 1, 0);
+    CAmount* cumulativeAmountsForwardTemp = new CAmount[problemDimension + 1]{};
     cumulativeAmountsForwardTemp[problemDimension] = 0;
     for (int index = problemDimension - 1; index >= 0; --index)
     {
@@ -418,7 +418,7 @@ CCoinsSelectionForNotes::CCoinsSelectionForNotes(std::vector<std::pair<CAmount, 
                                                                                 _targetAmountPlusOffset,
                                                                                 _availableTotalSize),
                                                                                 numberOfJoinsplitsOutputsAmounts {(unsigned int)_joinsplitsOutputsAmounts.size()},
-                                                                                joinsplitsOutputsAmounts(_joinsplitsOutputsAmounts)
+                                                                                joinsplitsOutputsAmounts {PrepareJoinsplitsOutputsAmounts(_joinsplitsOutputsAmounts)}
 {
     #if COINS_SELECTION_ALGORITHM_PROFILING
     iterations = 0;
@@ -427,6 +427,16 @@ CCoinsSelectionForNotes::CCoinsSelectionForNotes(std::vector<std::pair<CAmount, 
 
 CCoinsSelectionForNotes::~CCoinsSelectionForNotes()
 {
+}
+
+CAmount* CCoinsSelectionForNotes::PrepareJoinsplitsOutputsAmounts(std::vector<CAmount> joinsplitsOutputsAmounts)
+{
+    CAmount* joinsplitsOutputsAmountsTemp = new CAmount[numberOfJoinsplitsOutputsAmounts];
+    for (int index = 0; index < numberOfJoinsplitsOutputsAmounts; ++index)
+    {
+        joinsplitsOutputsAmountsTemp[index] = joinsplitsOutputsAmounts[index];
+    }
+    return joinsplitsOutputsAmountsTemp;
 }
 
 void CCoinsSelectionForNotes::Reset()
