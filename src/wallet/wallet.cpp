@@ -61,8 +61,8 @@ CFeeRate CWallet::minTxFee = CFeeRate(1000);
 
 struct CompareValueOnly
 {
-    bool operator()(const pair<CAmount, pair<const CWalletTransactionBase*, unsigned int> >& t1,
-                    const pair<CAmount, pair<const CWalletTransactionBase*, unsigned int> >& t2) const
+    bool operator()(const std::pair<CAmount, std::pair<const CWalletTransactionBase*, unsigned int> >& t1,
+                    const std::pair<CAmount, std::pair<const CWalletTransactionBase*, unsigned int> >& t2) const
     {
         return t1.first < t2.first;
     }
@@ -182,7 +182,7 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
 }
 
 bool CWallet::AddCryptedKey(const CPubKey &vchPubKey,
-                            const vector<unsigned char> &vchCryptedSecret)
+                            const std::vector<unsigned char> &vchCryptedSecret)
 {
     if (!CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret))
         return false;
@@ -470,9 +470,9 @@ bool CWallet::SetMaxVersion(int nVersion)
     return true;
 }
 
-set<uint256> CWallet::GetConflicts(const uint256& txid) const
+std::set<uint256> CWallet::GetConflicts(const uint256& txid) const
 {
-    set<uint256> result;
+    std::set<uint256> result;
     AssertLockHeld(cs_wallet);
 
     const MAP_WALLET_CONST_IT it = mapWallet.find(txid);
@@ -511,7 +511,7 @@ void CWallet::Flush(bool shutdown)
     bitdb.Flush(shutdown);
 }
 
-bool CWallet::Verify(const string& walletFile, string& warningString, string& errorString)
+bool CWallet::Verify(const std::string& walletFile, std::string& warningString, std::string& errorString)
 {
     if (!bitdb.Open(GetDataDir()))
     {
@@ -527,7 +527,7 @@ bool CWallet::Verify(const string& walletFile, string& warningString, string& er
         // try again
         if (!bitdb.Open(GetDataDir())) {
             // if it still fails, it probably means we can't even create the database env
-            string msg = strprintf(_("Error initializing wallet database environment %s!"), GetDataDir());
+            std::string msg = strprintf(_("Error initializing wallet database environment %s!"), GetDataDir());
             errorString += msg;
             return true;
         }
@@ -555,7 +555,7 @@ bool CWallet::Verify(const string& walletFile, string& warningString, string& er
 }
 
 template <class T>
-void CWallet::SyncMetaData(pair<typename TxSpendMap<T>::iterator, typename TxSpendMap<T>::iterator> range)
+void CWallet::SyncMetaData(std::pair<typename TxSpendMap<T>::iterator, typename TxSpendMap<T>::iterator> range)
 {
     // We want all the wallet transactions in range to have the same metadata as
     // the oldest (smallest nOrderPos).
@@ -600,7 +600,7 @@ void CWallet::SyncMetaData(pair<typename TxSpendMap<T>::iterator, typename TxSpe
 bool CWallet::IsSpent(const uint256& hash, unsigned int n) const
 {
     const COutPoint outpoint(hash, n);
-    pair<TxSpends::const_iterator, TxSpends::const_iterator> range;
+    std::pair<TxSpends::const_iterator, TxSpends::const_iterator> range;
     range = mapTxSpends.equal_range(outpoint);
 
     for (TxSpends::const_iterator it = range.first; it != range.second; ++it) {
@@ -624,7 +624,7 @@ bool CWallet::IsSpent(const uint256& hash, unsigned int n) const
  */
 bool CWallet::IsSpent(const uint256& nullifier) const
 {
-    pair<TxNullifiers::const_iterator, TxNullifiers::const_iterator> range;
+    std::pair<TxNullifiers::const_iterator, TxNullifiers::const_iterator> range;
     range = mapTxNullifiers.equal_range(nullifier);
 
     for (TxNullifiers::const_iterator it = range.first; it != range.second; ++it) {
@@ -639,18 +639,18 @@ bool CWallet::IsSpent(const uint256& nullifier) const
 
 void CWallet::AddToSpends(const COutPoint& outpoint, const uint256& wtxid)
 {
-    mapTxSpends.insert(make_pair(outpoint, wtxid));
+    mapTxSpends.insert(std::make_pair(outpoint, wtxid));
 
-    pair<TxSpends::iterator, TxSpends::iterator> range;
+    std::pair<TxSpends::iterator, TxSpends::iterator> range;
     range = mapTxSpends.equal_range(outpoint);
     SyncMetaData<COutPoint>(range);
 }
 
 void CWallet::AddToSpends(const uint256& nullifier, const uint256& wtxid)
 {
-    mapTxNullifiers.insert(make_pair(nullifier, wtxid));
+    mapTxNullifiers.insert(std::make_pair(nullifier, wtxid));
 
-    pair<TxNullifiers::iterator, TxNullifiers::iterator> range;
+    std::pair<TxNullifiers::iterator, TxNullifiers::iterator> range;
     range = mapTxNullifiers.equal_range(nullifier);
     SyncMetaData<uint256>(range);
 }
@@ -1091,7 +1091,7 @@ bool CWallet::AddToWallet(const CWalletTransactionBase& wtxIn, bool fFromLoadWal
         mapWallet[hash] = wtxIn.MakeWalletMapObject();
         CWalletTransactionBase& wtx = *mapWallet[hash];
         wtx.BindWallet(this);
-        wtxOrdered.insert(make_pair(wtx.nOrderPos, TxPair(&wtx, (CAccountingEntry*)0)));
+        wtxOrdered.insert(std::make_pair(wtx.nOrderPos, TxPair(&wtx, (CAccountingEntry*)0)));
         UpdateNullifierNoteMapWithTx(*(mapWallet[hash]));
         AddToSpends(hash);
     }
@@ -1100,7 +1100,7 @@ bool CWallet::AddToWallet(const CWalletTransactionBase& wtxIn, bool fFromLoadWal
         LOCK(cs_wallet);
         // Inserts only if not already there, returns tx inserted or tx found
         auto obj = wtxIn.MakeWalletMapObject();
-        auto ret = mapWallet.insert(make_pair(hash, obj) );
+        auto ret = mapWallet.insert(std::make_pair(hash, obj) );
         CWalletTransactionBase& wtx = *((*ret.first).second);
         wtx.BindWallet(this);
         UpdateNullifierNoteMapWithTx(wtx);
@@ -1109,7 +1109,7 @@ bool CWallet::AddToWallet(const CWalletTransactionBase& wtxIn, bool fFromLoadWal
         {
             wtx.nTimeReceived = GetTime();
             wtx.nOrderPos = IncOrderPosNext(pwalletdb);
-            wtxOrdered.insert(make_pair(wtx.nOrderPos, TxPair(&wtx, (CAccountingEntry*)0)));
+            wtxOrdered.insert(std::make_pair(wtx.nOrderPos, TxPair(&wtx, (CAccountingEntry*)0)));
 
             wtx.nTimeSmart = wtx.nTimeReceived;
             if (!wtxIn.hashBlock.IsNull())
@@ -1742,7 +1742,7 @@ int CWalletTransactionBase::GetRequestCount() const
             // Generated block
             if (!hashBlock.IsNull())
             {
-                map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
+                std::map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
                 if (mi != pwallet->mapRequestCount.end())
                     nRequests = (*mi).second;
             }
@@ -1750,7 +1750,7 @@ int CWalletTransactionBase::GetRequestCount() const
         else
         {
             // Did anyone request this transaction?
-            map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(getTxBase()->GetHash());
+            std::map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(getTxBase()->GetHash());
             if (mi != pwallet->mapRequestCount.end())
             {
                 nRequests = (*mi).second;
@@ -1758,7 +1758,7 @@ int CWalletTransactionBase::GetRequestCount() const
                 // How about the block it's in?
                 if (nRequests == 0 && !hashBlock.IsNull())
                 {
-                    map<uint256, int>::const_iterator ki = pwallet->mapRequestCount.find(hashBlock);
+                    std::map<uint256, int>::const_iterator ki = pwallet->mapRequestCount.find(hashBlock);
                     if (ki != pwallet->mapRequestCount.end())
                         nRequests = (*ki).second;
                     else
@@ -1772,7 +1772,7 @@ int CWalletTransactionBase::GetRequestCount() const
 
 // GetAmounts will determine the transparent debits and credits for a given wallet tx.
 void CWalletTx::GetAmounts(list<COutputEntry>& listReceived, list<COutputEntry>& listSent,
-    CAmount& nFee, string& strSentAccount, const isminefilter& filter) const
+    CAmount& nFee, std::string& strSentAccount, const isminefilter& filter) const
 {
     nFee = 0;
     listReceived.clear();
@@ -1923,13 +1923,13 @@ void CWalletTx::GetAmounts(list<COutputEntry>& listReceived, list<COutputEntry>&
     }
 }
 
-void CWalletTransactionBase::GetMatureAmountsForAccount(const string& strAccount, CAmount& nReceived,
+void CWalletTransactionBase::GetMatureAmountsForAccount(const std::string& strAccount, CAmount& nReceived,
                                   CAmount& nSent, CAmount& nFee, const isminefilter& filter) const
 {
     nReceived = nSent = nFee = 0;
 
     CAmount allFee;
-    string strSentAccount;
+    std::string strSentAccount;
     list<COutputEntry> listReceived;
     list<COutputEntry> listSent;
     GetAmounts(listReceived, listSent, allFee, strSentAccount, filter);
@@ -1943,7 +1943,7 @@ void CWalletTransactionBase::GetMatureAmountsForAccount(const string& strAccount
         LOCK(pwallet->cs_wallet);
         for(const COutputEntry& r: listReceived) {
             if (pwallet->mapAddressBook.count(r.destination)) {
-                map<CTxDestination, CAddressBookData>::const_iterator mi = pwallet->mapAddressBook.find(r.destination);
+                std::map<CTxDestination, CAddressBookData>::const_iterator mi = pwallet->mapAddressBook.find(r.destination);
                 if (mi != pwallet->mapAddressBook.end() &&
                     (*mi).second.name == strAccount &&
                     r.maturity == CCoins::outputMaturity::MATURE)
@@ -2225,7 +2225,7 @@ void CWalletTransactionBase::addOrderedInputTx(TxItems& txOrdered, const CScript
         auto res = std::search(utxo.scriptPubKey.begin(), utxo.scriptPubKey.end(), scriptPubKey.begin(), scriptPubKey.end());
         if (res == utxo.scriptPubKey.begin()) {
             auto meAsObj = pwallet->getMapWallet().at(getTxBase()->GetHash());
-            txOrdered.insert(make_pair(nOrderPos, TxPair(meAsObj.get(), (CAccountingEntry*)0)));
+            txOrdered.insert(std::make_pair(nOrderPos, TxPair(meAsObj.get(), (CAccountingEntry*)0)));
             return;
         }
     }
@@ -2557,7 +2557,7 @@ void CWalletTransactionBase::Reset(const CWallet* pwalletIn)
 
 std::set<uint256> CWalletTransactionBase::GetConflicts() const
 {
-    set<uint256> result;
+    std::set<uint256> result;
     if (pwallet != nullptr) {
         uint256 myHash = getTxBase()->GetHash();
         result = pwallet->GetConflicts(myHash);
@@ -2617,7 +2617,7 @@ std::vector<uint256> CWallet::ResendWalletTransactionsBefore(int64_t nTime)
         // Don't rebroadcast if newer than nTime:
         if (wtx.nTimeReceived > nTime)
             continue;
-        mapSorted.insert(make_pair(wtx.nTimeReceived, &wtx));
+        mapSorted.insert(std::make_pair(wtx.nTimeReceived, &wtx));
     }
     for (auto& item : mapSorted)
     {
@@ -2893,7 +2893,7 @@ CAmount CWallet::GetImmatureWatchOnlyBalance() const
 /**
  * populate vCoins with vector of available COutputs.
  */
-void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl *coinControl, bool fIncludeZeroValue, bool fIncludeCoinBase, bool fIncludeCommunityFund) const
+void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl *coinControl, bool fIncludeZeroValue, bool fIncludeCoinBase, bool fIncludeCommunityFund) const
 {
     vCoins.clear();
 
@@ -2951,8 +2951,8 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
     }
 }
 
-bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, vector<COutput> vCoins,
-                                 vector<COutput>& vCoinsRet, CAmount& nValueRet, size_t &selectionTotalBytes,
+bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, std::vector<COutput> vCoins,
+                                 std::vector<COutput>& vCoinsRet, CAmount& nValueRet, size_t &selectionTotalBytes,
                                  size_t availableBytes, bool useInputsNetValues) const
 {
     vCoinsRet.clear();
@@ -2961,13 +2961,13 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
 
     // List of values less than target
     // <gross value, value, output, size>
-    vector<tuple<CAmount, CAmount, COutput, size_t>> vValue;
+    std::vector<std::tuple<CAmount, CAmount, COutput, size_t>> vValue;
     // Lowest larger (than target value) coin
     // <gross value, value, output, size>
-    tuple<CAmount, CAmount, COutput, size_t> coinLowestLarger(std::numeric_limits<CAmount>::max(),
-                                                              std::numeric_limits<CAmount>::max(),
-                                                              COutput(NULL, 0, 0 , false),
-                                                              0);
+    std::tuple<CAmount, CAmount, COutput, size_t> coinLowestLarger(std::numeric_limits<CAmount>::max(),
+                                                                   std::numeric_limits<CAmount>::max(),
+                                                                   COutput(NULL, 0, 0 , false),
+                                                                   0);
 
     CAmount nTotalLower = 0;
     size_t selectionTotalBytesLower = 0;
@@ -2989,7 +2989,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
         CAmount value = useInputsNetValues ? netValue : grossValue;
 
         // <gross value, value, output, size>
-        tuple<CAmount, CAmount, COutput, size_t> coin = make_tuple(grossValue, value, output, estimatedInputSize);
+        std::tuple<CAmount, CAmount, COutput, size_t> coin = std::make_tuple(grossValue, value, output, estimatedInputSize);
 
         // if coin is less than target, add it to the set of possible coins to be selected
         if (value < nTargetValue)
@@ -3034,8 +3034,8 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
     }
 
     // this must be kept for preserving ordering between vValue and optimalSelection
-    std::sort(vValue.begin(), vValue.end(), [](tuple<CAmount, CAmount, COutput, size_t> left,
-                                               tuple<CAmount, CAmount, COutput, size_t> right)
+    std::sort(vValue.begin(), vValue.end(), [](std::tuple<CAmount, CAmount, COutput, size_t> left,
+                                               std::tuple<CAmount, CAmount, COutput, size_t> right)
                                                -> bool { return ( std::get<1>(left) > std::get<1>(right)); } );
 
     std::vector<std::pair<CAmount, size_t>> amountsAndSizes = std::vector<std::pair<CAmount, size_t>>(vValue.size(), std::make_pair(0, 0));
@@ -3051,7 +3051,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
     std::unique_ptr<CCoinsSelectionAlgorithmBase> bestAlgorithm = nullptr;
 
     std::unique_ptr<CCoinsSelectionAlgorithmBase> fastNotOptimalAlgorithm;
-    for (int i = 0; i < COINS_SELECTION_INTERMEDIATE_CHANGE_LEVELS + 2; ++i)
+    for (int i = 0, end = COINS_SELECTION_INTERMEDIATE_CHANGE_LEVELS + 2; i < end; ++i)
     {
         const CAmount targetAmountPlusOffset = targetAmountPlusOffsetNoChange +
                                                (double)(i) / (COINS_SELECTION_INTERMEDIATE_CHANGE_LEVELS + 1) * (targetAmountPlusOffsetMaxChange - targetAmountPlusOffsetNoChange);
@@ -3083,7 +3083,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int
             slowOptimalAlgorithm->StopSolving();
         }
         CCoinsSelectionAlgorithmBase::GetBestAlgorithmBySolution(slowOptimalAlgorithm, fastNotOptimalAlgorithm, bestAlgorithm);
-        LogPrint("selectcoins", "Best algorithm: %s - %s", std::to_string((int)bestAlgorithm->type).c_str(), bestAlgorithm->ToString().c_str());
+        LogPrint("selectcoins", "Best algorithm: %s - %s", std::to_string((int)bestAlgorithm->type), bestAlgorithm->ToString());
 
         // std::cout << std::to_string((int)bestAlgorithm->type) + " - " + bestAlgorithm->ToString() + "\n" << std::flush;
     }
@@ -3134,7 +3134,7 @@ size_t CWallet::EstimateInputSize(const CWalletTransactionBase* transaction, uns
     return inSize;
 }
 
-bool CWallet::SelectCoins(const CAmount& nTargetValue, vector<COutput>& vCoinsRet, CAmount& nValueRet, size_t& selectionTotalBytes,
+bool CWallet::SelectCoins(const CAmount& nTargetValue, std::vector<COutput>& vCoinsRet, CAmount& nValueRet, size_t& selectionTotalBytes,
                           bool& fOnlyCoinbaseCoinsRet, bool& fNeedCoinbaseCoinsRet,
                           const CCoinControl* coinControl, size_t availableBytes, bool useInputsNetValues) const
 {
@@ -3147,12 +3147,12 @@ bool CWallet::SelectCoins(const CAmount& nTargetValue, vector<COutput>& vCoinsRe
         fProtectCFCoinbase = fProtectCoinbase;
 
     // Output parameter fOnlyCoinbaseCoinsRet is set to true when the only available coins are coinbase utxos.
-    vector<COutput> vCoinsNoProtectedCoinbase, vCoinsWithProtectedCoinbase;
+    std::vector<COutput> vCoinsNoProtectedCoinbase, vCoinsWithProtectedCoinbase;
     AvailableCoins(vCoinsNoProtectedCoinbase, true, coinControl, false, false, !fProtectCFCoinbase);
     AvailableCoins(vCoinsWithProtectedCoinbase, true, coinControl, false, true, true);
     fOnlyCoinbaseCoinsRet = vCoinsNoProtectedCoinbase.size() == 0 && vCoinsWithProtectedCoinbase.size() > 0;
 
-    vector<COutput> vCoins = (fProtectCoinbase) ? vCoinsNoProtectedCoinbase : vCoinsWithProtectedCoinbase;
+    std::vector<COutput> vCoins = (fProtectCoinbase) ? vCoinsNoProtectedCoinbase : vCoinsWithProtectedCoinbase;
 
     // Output parameter fNeedCoinbaseCoinsRet is set to true if coinbase utxos need to be spent to meet target amount
     if (fProtectCoinbase && vCoinsWithProtectedCoinbase.size() > vCoinsNoProtectedCoinbase.size()) {
@@ -3189,7 +3189,7 @@ bool CWallet::SelectCoins(const CAmount& nTargetValue, vector<COutput>& vCoinsRe
     }
 
     // calculate value from preset inputs and store them
-    vector<COutput> vPresetCoins;
+    std::vector<COutput> vPresetCoins;
     CAmount nValueFromPresetInputs = 0;
 
     std::vector<COutPoint> vPresetInputs;
@@ -3243,7 +3243,7 @@ bool CWallet::SelectCoins(const CAmount& nTargetValue, vector<COutput>& vCoinsRe
 
 bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount &nFeeRet, int& nChangePosRet, std::string& strFailReason)
 {
-    vector<CRecipient> vecSend;
+    std::vector<CRecipient> vecSend;
 
     // Turn the txout set into a CRecipient vector
     for(const CTxOut& txOut: tx.getVout())
@@ -3253,9 +3253,9 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount &nFeeRet, int& nC
     }
 
     // Turn the ccout set into a CcRecipientVariant vector
-    vector<CRecipientScCreation> vecScSend;
-    vector<CRecipientForwardTransfer> vecFtSend;
-    vector<CRecipientBwtRequest> vecBwtRequest;
+    std::vector<CRecipientScCreation> vecScSend;
+    std::vector<CRecipientForwardTransfer> vecFtSend;
+    std::vector<CRecipientBwtRequest> vecBwtRequest;
     Sidechain::fundCcRecipients(tx, vecScSend, vecFtSend, vecBwtRequest);
     
     CCoinControl coinControl;
@@ -3473,7 +3473,7 @@ bool CWallet::CreateTransaction(
                 double dPriority = 0;
 
                 // Choose coins to use
-                vector<COutput> setCoins;
+                std::vector<COutput> setCoins;
                 CAmount nValueIn = 0;
                 bool fOnlyCoinbaseCoins = false;
                 bool fNeedCoinbaseCoins = false;
@@ -3817,7 +3817,7 @@ bool CWallet::AddAccountingEntry(const CAccountingEntry& acentry, CWalletDB & pw
 
     laccentries.push_back(acentry);
     CAccountingEntry & entry = laccentries.back();
-    wtxOrdered.insert(make_pair(entry.nOrderPos, TxPair((CWalletTransactionBase*)0, &entry)));
+    wtxOrdered.insert(std::make_pair(entry.nOrderPos, TxPair((CWalletTransactionBase*)0, &entry)));
 
     return true;
 }
@@ -3899,7 +3899,7 @@ DBErrors CWallet::ZapWalletTx(std::vector<std::shared_ptr<CWalletTransactionBase
 }
 
 
-bool CWallet::SetAddressBook(const CTxDestination& address, const string& strName, const string& strPurpose)
+bool CWallet::SetAddressBook(const CTxDestination& address, const std::string& strName, const std::string& strPurpose)
 {
     bool fUpdated = false;
     {
@@ -3928,7 +3928,7 @@ bool CWallet::DelAddressBook(const CTxDestination& address)
         {
             // Delete destdata tuples associated with address
             std::string strAddress = CBitcoinAddress(address).ToString();
-            BOOST_FOREACH(const PAIRTYPE(string, string) &item, mapAddressBook[address].destdata)
+            BOOST_FOREACH(const PAIRTYPE(std::string, std::string) &item, mapAddressBook[address].destdata)
             {
                 CWalletDB(strWalletFile).EraseDestData(strAddress, item.first);
             }
@@ -4094,7 +4094,7 @@ int64_t CWallet::GetOldestKeyPoolTime()
 
 std::map<CTxDestination, CAmount> CWallet::GetAddressBalances()
 {
-    map<CTxDestination, CAmount> balances;
+    std::map<CTxDestination, CAmount> balances;
 
     {
         LOCK(cs_wallet);
@@ -4136,11 +4136,11 @@ std::map<CTxDestination, CAmount> CWallet::GetAddressBalances()
     return balances;
 }
 
-set< set<CTxDestination> > CWallet::GetAddressGroupings()
+std::set<std::set<CTxDestination>> CWallet::GetAddressGroupings()
 {
     AssertLockHeld(cs_wallet); // mapWallet
-    set< set<CTxDestination> > groupings;
-    set<CTxDestination> grouping;
+    std::set<std::set<CTxDestination>> groupings;
+    std::set<CTxDestination> grouping;
 
     for (auto& walletEntry: mapWallet)
     {
@@ -4193,20 +4193,20 @@ set< set<CTxDestination> > CWallet::GetAddressGroupings()
             }
     }
 
-    set< set<CTxDestination>* > uniqueGroupings; // a set of pointers to groups of addresses
-    map< CTxDestination, set<CTxDestination>* > setmap;  // map addresses to the unique group containing it
-    BOOST_FOREACH(set<CTxDestination> grouping, groupings)
+    std::set<std::set<CTxDestination>*> uniqueGroupings; // a set of pointers to groups of addresses
+    std::map<CTxDestination, std::set<CTxDestination>*> setmap;  // map addresses to the unique group containing it
+    BOOST_FOREACH(std::set<CTxDestination> grouping, groupings)
     {
         // make a set of all the groups hit by this new group
-        set< set<CTxDestination>* > hits;
-        map< CTxDestination, set<CTxDestination>* >::iterator it;
+        std::set<std::set<CTxDestination>*> hits;
+        std::map<CTxDestination, std::set<CTxDestination>*>::iterator it;
         BOOST_FOREACH(CTxDestination address, grouping)
             if ((it = setmap.find(address)) != setmap.end())
                 hits.insert((*it).second);
 
         // merge all hit groups into a new single group and delete old groups
-        set<CTxDestination>* merged = new set<CTxDestination>(grouping);
-        BOOST_FOREACH(set<CTxDestination>* hit, hits)
+        std::set<CTxDestination>* merged = new std::set<CTxDestination>(grouping);
+        BOOST_FOREACH(std::set<CTxDestination>* hit, hits)
         {
             merged->insert(hit->begin(), hit->end());
             uniqueGroupings.erase(hit);
@@ -4219,8 +4219,8 @@ set< set<CTxDestination> > CWallet::GetAddressGroupings()
             setmap[element] = merged;
     }
 
-    set< set<CTxDestination> > ret;
-    BOOST_FOREACH(set<CTxDestination>* uniqueGrouping, uniqueGroupings)
+    std::set<std::set<CTxDestination>> ret;
+    BOOST_FOREACH(std::set<CTxDestination>* uniqueGrouping, uniqueGroupings)
     {
         ret.insert(*uniqueGrouping);
         delete uniqueGrouping;
@@ -4232,11 +4232,11 @@ set< set<CTxDestination> > CWallet::GetAddressGroupings()
 std::set<CTxDestination> CWallet::GetAccountAddresses(const std::string& strAccount) const
 {
     LOCK(cs_wallet);
-    set<CTxDestination> result;
+    std::set<CTxDestination> result;
     BOOST_FOREACH(const PAIRTYPE(CTxDestination, CAddressBookData)& item, mapAddressBook)
     {
         const CTxDestination& address = item.first;
-        const string& strName = item.second.name;
+        const std::string& strName = item.second.name;
         if (strName == strAccount)
             result.insert(address);
     }
@@ -4279,7 +4279,7 @@ void CReserveKey::ReturnKey()
     vchPubKey = CPubKey();
 }
 
-void CWallet::GetAllReserveKeys(set<CKeyID>& setAddress) const
+void CWallet::GetAllReserveKeys(std::set<CKeyID>& setAddress) const
 {
     setAddress.clear();
 
@@ -4668,12 +4668,12 @@ bool CWallet::SelectNotes(const CAmount& nTargetValue, std::vector<CNotePlaintex
 
     // List of values less than target
     // <value, note, size>
-    vector<tuple<CAmount, CNotePlaintextEntry, size_t>> vValue;
+    std::vector<std::tuple<CAmount, CNotePlaintextEntry, size_t>> vValue;
     // Lowest larger (than target value) note
     // <value, note, size>
-    tuple<CAmount, CNotePlaintextEntry, size_t> noteLowestLarger(std::numeric_limits<CAmount>::max(),
-                                                                 CNotePlaintextEntry(),
-                                                                 0);
+    std::tuple<CAmount, CNotePlaintextEntry, size_t> noteLowestLarger(std::numeric_limits<CAmount>::max(),
+                                                                      CNotePlaintextEntry(),
+                                                                      0);
 
     CAmount nTotalLower = 0;
     size_t selectionTotalBytesLower = 0;
@@ -4684,7 +4684,7 @@ bool CWallet::SelectNotes(const CAmount& nTargetValue, std::vector<CNotePlaintex
         CAmount value = static_cast<CAmount>(note.plaintext.value());
 
         // <value, note, size>
-        tuple<CAmount, CNotePlaintextEntry, size_t> extendedNote = make_tuple(value, note, estimatedNoteSize);
+        std::tuple<CAmount, CNotePlaintextEntry, size_t> extendedNote = std::make_tuple(value, note, estimatedNoteSize);
 
         // if note is less than target, add it to the set of possible notes to be selected
         if (value < nTargetValue)
@@ -4734,8 +4734,8 @@ bool CWallet::SelectNotes(const CAmount& nTargetValue, std::vector<CNotePlaintex
     }
 
     // this must be kept for preserving ordering between vValue and optimalSelection
-    std::sort(vValue.begin(), vValue.end(), [](tuple<CAmount, CNotePlaintextEntry, size_t> left,
-                                               tuple<CAmount, CNotePlaintextEntry, size_t> right)
+    std::sort(vValue.begin(), vValue.end(), [](std::tuple<CAmount, CNotePlaintextEntry, size_t> left,
+                                               std::tuple<CAmount, CNotePlaintextEntry, size_t> right)
                                                -> bool { return ( std::get<0>(left) > std::get<0>(right)); } );
 
     std::vector<std::pair<CAmount, size_t>> amountsAndSizes = std::vector<std::pair<CAmount, size_t>>(vValue.size(), std::make_pair(0, 0));
@@ -4750,7 +4750,7 @@ bool CWallet::SelectNotes(const CAmount& nTargetValue, std::vector<CNotePlaintex
     const size_t availableTotalSize = availableBytes;
 
     std::unique_ptr<CCoinsSelectionAlgorithmBase> fastNotOptimalAlgorithm;
-    for (int i = 0; i < COINS_SELECTION_INTERMEDIATE_CHANGE_LEVELS + 2; ++i)
+    for (int i = 0, end = COINS_SELECTION_INTERMEDIATE_CHANGE_LEVELS + 2; i < end; ++i)
     {
         const CAmount targetAmountPlusOffset = targetAmountPlusOffsetNoChange +
                                                (double)(i) / (COINS_SELECTION_INTERMEDIATE_CHANGE_LEVELS + 1) * (targetAmountPlusOffsetMaxChange - targetAmountPlusOffsetNoChange);

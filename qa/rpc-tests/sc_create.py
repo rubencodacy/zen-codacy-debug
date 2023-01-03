@@ -131,7 +131,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[2].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -151,7 +151,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -170,7 +170,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -190,7 +190,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -210,7 +210,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -230,7 +230,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -249,7 +249,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -268,7 +268,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -287,7 +287,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -306,7 +306,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -327,7 +327,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -347,7 +347,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -367,7 +367,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -387,7 +387,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -407,7 +407,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -427,7 +427,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -447,7 +447,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -467,7 +467,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -488,7 +488,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
@@ -509,7 +509,7 @@ class SCCreateTest(BitcoinTestFramework):
 
         try:
             self.nodes[1].sc_create(cmdInput)
-            assert(True)
+            assert(False)
         except JSONRPCException as e:
             errorString = e.error['message']
             mark_logs(errorString, self.nodes, DEBUG_MODE)
