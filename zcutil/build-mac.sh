@@ -79,7 +79,7 @@ NO_RUST="$RUST_ARG" make "$@" -C ./depends/ V=1 NO_QT=1
 
 ./autogen.sh
 CPPFLAGS="-I$PREFIX/include -arch x86_64" LDFLAGS="-L$PREFIX/lib -arch x86_64 -Wl,-no_pie" \
-CXXFLAGS="-arch x86_64 -I/usr/local/Cellar/gcc\@5/5.5.0/include/c++/5.5.0 -I$PREFIX/include -fwrapv -fno-strict-aliasing -Werror -g -Wl,-undefined -Wl,dynamic_lookup" \
+CXXFLAGS="-arch x86_64 -I/usr/local/Cellar/gcc\@5/5.5.0/include/c++/5.5.0 -I$PREFIX/include -fwrapv -fno-strict-aliasing -Werror -Wl,-undefined -Wl,dynamic_lookup" \
 ./configure --prefix="${PREFIX}" --with-gui=no "$HARDENING_ARG" "$LCOV_ARG" "$RUST_ARG" "$MINING_ARG"
 
 #CPPFLAGS="-I$PREFIX/include -arch x86_64" LDFLAGS="-L$PREFIX/lib -arch x86_64 -Wl,-no_pie" \
