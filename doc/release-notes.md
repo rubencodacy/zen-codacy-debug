@@ -1,6 +1,28 @@
 (note: this is a temporary file, to be added-to by anybody, and moved to
 release-notes at release time)
 
-Notable changes
-===============
+zend vx.y.z
+=========
+
+## Breaking changes
+* <THIS SECTION SHOULD CONTAIN API, ABI AND BEHAVIORAL BREAKING CHANGES>
+
+
+## New Features and Improvements
+* <THIS SECTION SHOULD CONTAIN CHANGES INTRODUCING NEW FEATURES OR IMPROVEMENTS TO EXISTING ONES>
+
+## Bugfixes and Minor Changes
+* <SIMILAR TO ABOVE SECTION, BUT FOR OTHER IMPORTANT CHANGES / BUG FIXES>
+* <IF A CHANGE CLOSES A GITHUB ISSUE, IT SHOULD BE DOCUMENTED HERE>
+
+## Security
+* <THIS SECTION SHOULD CONTAIN CHANGES THAT FIX IMPORTANT SECURITY ISSUES>
+
+## Known bugs
+* <THIS SECTION SHOULD CONTAIN KNOWN BUGS THAT HAVE NOT BEEN ADDRESSED IN THIS RELEASE>
+
+## Contributors
+Thanks to ,,,,,, for their first contribution to zend!
+
+<INSERT THE LIST OF THOSE WHO DID AT LEAST ON COMMIT FOR THIS RELEASE>
 
